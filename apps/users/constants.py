@@ -1,8 +1,7 @@
 USERNAME_REQUIRED = 'Username is required.'
+USERNAME_EXISTS = 'Username already exists.'
 PASSWORD_REQUIRED = 'Passdword is required.'
 EMAIL_REQUIRED = 'Email is required.'
-
-USERNAME_EXISTS = 'Username already exists.'
 EMAIL_EXISTS = 'Email already exists.'
 
 TOKEN_KEY_NOT_VALID = 'Token key is not valid.'

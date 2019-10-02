@@ -11,9 +11,10 @@ from apps.settings import SECRET_KEY, JWTOKEN_PREFIX, JWTOKEN_DURATION
 from .constants import (
     USERNAME_REQUIRED,
     USERNAME_EXISTS,
+    PASSWORD_REQUIRED,
     EMAIL_REQUIRED,
     EMAIL_EXISTS,
-    PASSWORD_REQUIRED,
+
     TOKEN_KEY_NOT_VALID,
     TOKEN_USER_NOT_EXISTS,
     TOKEN_USER_NOT_ACTIVE,
@@ -29,36 +30,30 @@ class UserManager(BaseUserManager):
     inheriting from `BaseUserManager` get a lot of Django code.
     '''
 
-    def create_user(self, username, email, password=None):
+    def create_user(self, username=None, email=None, password=None):
         '''Creates and returns a user.'''
 
-        errors = []
-        if not username:
-            errors += [USERNAME_REQUIRED]
-
-        elif self.model.objects.filter(username=username):
-            errors += [USERNAME_EXISTS]
-
-        if not email:
-            errors += [EMAIL_REQUIRED]
-
-        elif self.model.objects.filter(email=email):
-            errors += [EMAIL_EXISTS]
-
-        if errors:
-            raise Exception(','.join(errors))
-
         user = self.model(username=username, email=self.normalize_email(email))
-        user.set_password(password)
+
+        if not password or not password.strip():
+            user.password = None  # Should raise a required message
+        else:
+            user.set_password(password)  # Should store as hashed string
+
+        # Remove spaces in front and back of strings
+        for field in user._meta.fields:
+            if isinstance(field, (models.CharField, models.TextField)):
+                value = getattr(user, field.name)
+                if value:
+                    setattr(user, field.name, value.strip())
+
+        user.full_clean()
         user.save()
 
         return user
 
     def create_superuser(self, username, email, password):
         '''Creates and returns a user with superuser permissions.'''
-
-        if not password:
-            raise TypeError(PASSWORD_REQUIRED)
 
         user = self.create_user(username, email, password)
         user.is_superuser = True
@@ -71,10 +66,27 @@ class UserManager(BaseUserManager):
 class User(AbstractBaseUser, PermissionsMixin):
     '''Defines a custom user model.'''
 
-    username = models.CharField(db_index=True, max_length=255, unique=True)
-    email = models.EmailField(db_index=True, unique=True)
-    # I've tried: error_messages={'unique': EMAIL_EXISTS})
-    # but couldn't override the `unique constraint` db error
+    username = models.CharField(
+        max_length=128, 
+        db_index=True,
+        unique=True,
+        null=False,
+        blank=False
+    )
+
+    password = models.CharField(
+        max_length=128,
+        null=False,
+        blank=False
+    )
+
+    email = models.EmailField(
+        max_length=128,
+        db_index=True,
+        unique=True,
+        null=False,
+        blank=False
+    )
 
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
@@ -82,11 +94,40 @@ class User(AbstractBaseUser, PermissionsMixin):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    # USERNAME_FIELD define which field is used to signin
-    USERNAME_FIELD = 'username'  # ''email'
-    REQUIRED_FIELDS = ['email']  # ['username']
+    USERNAME_FIELD = 'username'  # Which field is used to signin
+    # REQUIRED_FIELDS = ['email']  # ['username']
 
     objects = UserManager()
+
+    def __init__(self, *args, **kwargs):
+        super(AbstractBaseUser, self).__init__(*args, **kwargs)
+        super(PermissionsMixin, self).__init__(*args, **kwargs)
+
+        # `error_messages` are used when `full_clean()` method is called
+        # before `save()` method and database constraints
+        field = self._meta.get_field('username')
+        field.error_messages['required'] = USERNAME_REQUIRED
+        field.error_messages['null'] = USERNAME_REQUIRED
+        field.error_messages['blank'] = USERNAME_REQUIRED
+        field.error_messages['unique'] = USERNAME_EXISTS
+
+        field = self._meta.get_field('password')
+        field.error_messages['required'] = PASSWORD_REQUIRED
+        field.error_messages['null'] = PASSWORD_REQUIRED
+        field.error_messages['blank'] = PASSWORD_REQUIRED
+
+        field = self._meta.get_field('email')
+        field.error_messages['required'] = EMAIL_REQUIRED
+        field.error_messages['null'] = EMAIL_REQUIRED
+        field.error_messages['blank'] = EMAIL_REQUIRED
+        field.error_messages['unique'] = EMAIL_EXISTS
+
+#    def clean(self):
+#        for field in self._meta.fields:
+#            if isinstance(field, (models.CharField, models.TextField)):
+#                value = getattr(self, field.name)
+#                if value:
+#                    setattr(self, field.name, value.strip())
 
     def __str__(self):
         return self.username

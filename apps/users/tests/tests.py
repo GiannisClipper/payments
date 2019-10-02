@@ -1,5 +1,6 @@
 from django.test import TestCase
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 
 from unittest import skip  # noqa: F401
 
@@ -13,6 +14,7 @@ from apps.settings import JWTOKEN_DURATION
 from users.constants import (
     USERNAME_REQUIRED,
     USERNAME_EXISTS,
+    PASSWORD_REQUIRED,
     EMAIL_REQUIRED,
     EMAIL_EXISTS,
 )
@@ -70,29 +72,47 @@ class UserModelBasicTests(UserModelTests):
 
 class UserModelValidationTests(UserModelTests):
 
-    def test_username_required_error(self):
+    def test_required_fields_errors(self):
         errors = None
-        self.samples[0]['username'] = None
+        del self.samples[0]['username']
+        del self.samples[0]['password']
+        del self.samples[0]['email']
 
         try:
             User.objects.create_user(**self.samples[0])
-        except Exception as err:
-            # May be returned multiple validation errors seperated with comma
-            errors = str(err).split(',')
+        except ValidationError as err:
+            errors = str(err)
 
         self.assertIn(USERNAME_REQUIRED, errors)
+        self.assertIn(PASSWORD_REQUIRED, errors)
+        self.assertIn(EMAIL_REQUIRED, errors)
 
-    def test_email_required_error(self):
+    def test_required_fields_errors_passing_values(self):
         errors = None
+        self.samples[0]['username'] = '        '
+        self.samples[0]['password'] = '        '
         self.samples[0]['email'] = None
 
         try:
             User.objects.create_user(**self.samples[0])
-        except Exception as err:
-            # May be returned multiple validation errors seperated with comma
-            errors = str(err).split(',')
+        except ValidationError as err:
+            errors = str(err)
 
+        self.assertIn(USERNAME_REQUIRED, errors)
+        self.assertIn(PASSWORD_REQUIRED, errors)
         self.assertIn(EMAIL_REQUIRED, errors)
+
+    def test_unique_fields_errors(self):
+        errors = None
+        User.objects.create_user(**self.samples[0])
+
+        try:
+            User.objects.create_user(**self.samples[0])
+        except Exception as err:
+            errors = str(err)
+
+        self.assertIn(USERNAME_EXISTS, errors)
+        self.assertIn(EMAIL_EXISTS, errors)
 
     def test_email_normalization(self):
         self.samples[0]['email'] = self.samples[0]['email'].upper()
@@ -103,32 +123,6 @@ class UserModelValidationTests(UserModelTests):
             self.samples[0]['email'].split('@')[0] + '@' +
             self.samples[0]['email'].split('@')[1].lower()
         )
-
-    def test_username_exists_error(self):
-        User.objects.create_user(**self.samples[0])
-        errors = None
-
-        self.samples[1]['username'] = self.samples[0]['username']
-        try:
-            User.objects.create_user(**self.samples[1])
-        except Exception as err:
-            # May be returned multiple validation errors seperated with comma
-            errors = str(err).split(',')
-
-        self.assertIn(USERNAME_EXISTS, errors)
-
-    def test_email_exists_error(self):
-        User.objects.create_user(**self.samples[0])
-        errors = None
-
-        self.samples[1]['email'] = self.samples[0]['email']
-        try:
-            User.objects.create_user(**self.samples[1])
-        except Exception as err:
-            # May be returned multiple validation errors seperated with comma
-            errors = str(err).split(',')
-
-        self.assertIn(EMAIL_EXISTS, errors)
 
 
 class JWTokenTests(UserModelTests):
