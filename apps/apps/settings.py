@@ -125,5 +125,11 @@ STATIC_URL = '/static/'
 
 
 # start custom settings
+
 AUTH_USER_MODEL = 'users.User'
+
+JWTOKEN_PREFIX = 'Token'
+
+JWTOKEN_DURATION = 60 * 60  # 3600 secs/ 1 hour
+
 # end custom settings
