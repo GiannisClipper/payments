@@ -39,24 +39,13 @@ class UserManager(BaseUserManager):
 
         user = self.model(
             username=username,
-            email=self.normalize_email(email),
-            password=password
+            email=self.normalize_email(email)
         )
 
-#        if not password or not password.strip():
-#            user.password = None  # Should raise a required message
-#        else:
-#            user.set_password(password)  # Should store as hashed string
+        # `password` value assigned after initializing `user` object in order
+        # to be converted to hashed string by the customized `save` method
+        user.password = password
 
-        # Remove leading or trailing spaces from strings
-        for field in user._meta.fields:
-            if isinstance(field, (models.CharField, models.TextField)):
-                value = getattr(user, field.name)
-                if value:
-                    setattr(user, field.name, value.strip())
-
-        user.full_clean()  # Field validations run here
-        user.set_password(user.password)  # Stored as hashed string
         user.save()
 
         return user
@@ -67,6 +56,7 @@ class UserManager(BaseUserManager):
         user = self.create_user(username, email, password)
         user.is_superuser = True
         user.is_staff = True
+
         user.save()
 
         return user
@@ -104,8 +94,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    USERNAME_FIELD = 'username'  # Which field is used to signin
-    # REQUIRED_FIELDS = ['email']  # ['username']
+    USERNAME_FIELD = 'username'  # Field is used to signin (ex. 'email')
 
     objects = UserManager()
 
@@ -113,8 +102,8 @@ class User(AbstractBaseUser, PermissionsMixin):
         super(AbstractBaseUser, self).__init__(*args, **kwargs)
         super(PermissionsMixin, self).__init__(*args, **kwargs)
 
-        # `error_messages` are used when `full_clean()` method is called
-        # before `save()` method and database constraints
+        # `error_messages` are used by `full_clean` method which is
+        # called before `save` method and database level constraints
         field = self._meta.get_field('username')
         field.error_messages['required'] = USERNAME_REQUIRED
         field.error_messages['null'] = USERNAME_REQUIRED
@@ -133,29 +122,32 @@ class User(AbstractBaseUser, PermissionsMixin):
         field.error_messages['blank'] = EMAIL_REQUIRED
         field.error_messages['unique'] = EMAIL_EXISTS
 
-#    def clean(self):
-#        for field in self._meta.fields:
-#            if isinstance(field, (models.CharField, models.TextField)):
-#                value = getattr(self, field.name)
-#                if value:
-#                    setattr(self, field.name, value.strip())
+        self.saved_password = self.password
 
-    def update(self, **fields):
-        '''Updates and returns a user.'''
+    def save(self, *args, **kwargs):
 
-        for key, value in fields.items():
-            setattr(self, key, value)
-
+        # Remove leading or trailing spaces from strings
         for field in self._meta.fields:
             if isinstance(field, (models.CharField, models.TextField)):
                 value = getattr(self, field.name)
                 if value:
                     setattr(self, field.name, value.strip())
 
-        self.full_clean()  # Field validations run here
+        # Field validations run here
+        self.full_clean()
 
-        if 'password' in fields.keys():
-            self.set_password(self.password)  # Stored as hashed string
+        # Only new passwords should be converted to hashed strings
+        if self.saved_password != self.password:
+            self.set_password(self.password)
+            self.saved_password = self.password
+
+        super().save(*args, **kwargs)
+
+    def update(self, **fields):
+        '''Updates and returns a user.'''
+
+        for key, value in fields.items():
+            setattr(self, key, value)
 
         self.save()
 
