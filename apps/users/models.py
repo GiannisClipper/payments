@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, \
                                         PermissionsMixin
 
+from django.core.validators import MinLengthValidator
+
 from datetime import datetime
 
 import jwt  # pip install pyjwt
@@ -12,6 +14,8 @@ from .constants import (
     USERNAME_REQUIRED,
     USERNAME_EXISTS,
     PASSWORD_REQUIRED,
+    PASSWORD_TOO_SHORT,
+    PASSWORD_MIN_LENGTH,
     EMAIL_REQUIRED,
     EMAIL_EXISTS,
 
@@ -33,21 +37,26 @@ class UserManager(BaseUserManager):
     def create_user(self, username=None, email=None, password=None):
         '''Creates and returns a user.'''
 
-        user = self.model(username=username, email=self.normalize_email(email))
+        user = self.model(
+            username=username,
+            email=self.normalize_email(email),
+            password=password
+        )
 
-        if not password or not password.strip():
-            user.password = None  # Should raise a required message
-        else:
-            user.set_password(password)  # Should store as hashed string
+#        if not password or not password.strip():
+#            user.password = None  # Should raise a required message
+#        else:
+#            user.set_password(password)  # Should store as hashed string
 
-        # Remove spaces in front and back of strings
+        # Remove leading or trailing spaces from strings
         for field in user._meta.fields:
             if isinstance(field, (models.CharField, models.TextField)):
                 value = getattr(user, field.name)
                 if value:
                     setattr(user, field.name, value.strip())
 
-        user.full_clean()
+        user.full_clean()  # Field validations run here
+        user.set_password(user.password)  # Stored as hashed string
         user.save()
 
         return user
@@ -67,7 +76,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     '''Defines a custom user model.'''
 
     username = models.CharField(
-        max_length=128, 
+        max_length=128,
         db_index=True,
         unique=True,
         null=False,
@@ -76,6 +85,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     password = models.CharField(
         max_length=128,
+        validators=[MinLengthValidator(PASSWORD_MIN_LENGTH)],
         null=False,
         blank=False
     )
@@ -115,6 +125,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         field.error_messages['required'] = PASSWORD_REQUIRED
         field.error_messages['null'] = PASSWORD_REQUIRED
         field.error_messages['blank'] = PASSWORD_REQUIRED
+        field.error_messages['min_length'] = PASSWORD_TOO_SHORT
 
         field = self._meta.get_field('email')
         field.error_messages['required'] = EMAIL_REQUIRED
@@ -128,6 +139,27 @@ class User(AbstractBaseUser, PermissionsMixin):
 #                value = getattr(self, field.name)
 #                if value:
 #                    setattr(self, field.name, value.strip())
+
+    def update(self, **fields):
+        '''Updates and returns a user.'''
+
+        for key, value in fields.items():
+            setattr(self, key, value)
+
+        for field in self._meta.fields:
+            if isinstance(field, (models.CharField, models.TextField)):
+                value = getattr(self, field.name)
+                if value:
+                    setattr(self, field.name, value.strip())
+
+        self.full_clean()  # Field validations run here
+
+        if 'password' in fields.keys():
+            self.set_password(self.password)  # Stored as hashed string
+
+        self.save()
+
+        return self
 
     def __str__(self):
         return self.username

@@ -1,6 +1,8 @@
 USERNAME_REQUIRED = 'Username is required.'
 USERNAME_EXISTS = 'Username already exists.'
 PASSWORD_REQUIRED = 'Passdword is required.'
+PASSWORD_MIN_LENGTH = 4
+PASSWORD_TOO_SHORT = f'Password too short (min {PASSWORD_MIN_LENGTH} chars).'
 EMAIL_REQUIRED = 'Email is required.'
 EMAIL_EXISTS = 'Email already exists.'
 
