@@ -133,7 +133,7 @@ REST_FRAMEWORK = {
 
     # Custom auth backend to authenticate requests or not
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'apps.users.backends.JWTAuthentication',
+        'users.backends.JWTAuthentication',
     )
 }
 

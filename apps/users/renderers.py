@@ -34,8 +34,8 @@ class GenericJSONRenderer:
 
         # New token generated while user signin, in other
         # cases resend the one that included in request
-        if not token and renderer_context['request'].auth:
-            token = renderer_context['request'].auth
+        ### if not token and renderer_context['request'].auth:
+        ###     token = renderer_context['request'].auth
 
             # TokenAuthentication provides on success following credentials:
             # request.user: a Django User instance

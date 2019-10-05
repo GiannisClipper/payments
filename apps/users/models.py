@@ -177,7 +177,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         return key
 
 
-class JWTokenHandler():
+class JWTokenHandler:
 
     def compose_header(key):
         '''Composes a JSON Web Token header with prefix and key.'''
@@ -193,13 +193,13 @@ class JWTokenHandler():
         if not header or len(header) != 2:
             raise Exception(TOKEN_HEADER_NOT_VALID)
 
-        # header[0] = header[0].decode('utf-8')
-        # header[1] = header[1].decode('utf-8')
+        prefix = header[0].decode('utf-8')  # Convert binary to str
+        key = header[1].decode('utf-8')  # Convert binary to str
 
-        if header[0] != JWTOKEN_PREFIX:
+        if prefix.lower() != JWTOKEN_PREFIX.lower():
             raise Exception(TOKEN_HEADER_PREFIX_NOT_VALID)
 
-        return header[1]
+        return key
 
     def encode_key(payload):
         '''Generates a JSON Web Token with user info and expiry time.'''
@@ -216,16 +216,6 @@ class JWTokenHandler():
             raise Exception(TOKEN_KEY_NOT_VALID + ' ' + str(err))
 
         return payload
-
-    def check_if_key_is_expired(expiration):
-        '''Checks if the token is expired.'''
-
-        now = datetime.timestamp(datetime.utcnow())
-
-        if expiration <= now:
-            raise Exception(TOKEN_KEY_EXPIRED)
-
-        return expiration
 
     def check_if_user_in_key_exists(id):
         '''Checks if the user's id in token exists in database.'''
@@ -244,3 +234,13 @@ class JWTokenHandler():
             raise Exception(TOKEN_USER_NOT_ACTIVE)
 
         return user
+
+    def check_if_key_is_expired(expiration):
+        '''Checks if the token is expired.'''
+
+        now = datetime.timestamp(datetime.utcnow())
+
+        if expiration <= now:
+            raise Exception(TOKEN_KEY_EXPIRED)
+
+        return expiration

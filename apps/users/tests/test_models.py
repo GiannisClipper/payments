@@ -202,13 +202,14 @@ class JWTokenTests(UserModelTests):
 
     def test_decode_key(self):
         payload, key = self.encode_key()
+        key = key.encode('utf-8')  # Convert str to binary
         returned_payload = JWTokenHandler.decode_key(key)
 
         self.assertEqual(returned_payload, payload)
 
     def test_decode_when_key_invalid(self):
         payload, key = self.encode_key()
-        key += 'go_invalid'
+        key = (key + 'invalid').encode('utf-8')  # Convert str to binary
 
         with self.assertRaises(Exception):
             JWTokenHandler.decode_key(key)
@@ -237,12 +238,14 @@ class JWTokenTests(UserModelTests):
     def test_decompose_header(self):
         payload, key = self.encode_key()
         header = JWTokenHandler.compose_header(key)
+        header = header.encode('utf-8')  # Convert str to binary
         returned_key = JWTokenHandler.decompose_header(header)
 
         self.assertEqual(returned_key, key)
 
     def test_decompose_when_header_invalid(self):
         header = 'Anything_but_not_a_valid_header'
+        header = header.encode('utf-8')  # Convert str to binary
 
         with self.assertRaises(Exception):
             JWTokenHandler.decompose_header(header)
@@ -250,7 +253,7 @@ class JWTokenTests(UserModelTests):
     def test_decompose_when_prefix_invalid(self):
         payload, key = self.encode_key()
         header = JWTokenHandler.compose_header(key)
-        header = 'go_invalid' + header
+        header = ('invalid' + header).encode('utf-8')  # Convert str to binary
 
         with self.assertRaises(Exception):
             JWTokenHandler.decompose_header(header)

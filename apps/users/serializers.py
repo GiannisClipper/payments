@@ -107,15 +107,15 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         write_only=True
     )
 
-    url = serializers.HyperlinkedIdentityField(
-        view_name='users:byid',
-        lookup_field='id',
-        read_only=True, 
-    )
+#    url = serializers.HyperlinkedIdentityField(
+#        view_name='users:byid',
+#        lookup_field='id',
+#        read_only=True, 
+#    )
 
     class Meta:
         model = User
-        fields = ('id', 'username', 'password', 'email', 'admin', 'is_active', 'url',)
+        fields = ('id', 'username', 'password', 'email', 'admin', 'is_active',)  # 'url',)
 
         # Alternative to read_only=True, prefered
         # cause don't want to specify anything else
