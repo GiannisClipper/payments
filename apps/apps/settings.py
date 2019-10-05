@@ -126,6 +126,12 @@ STATIC_URL = '/static/'
 
 # start custom settings
 
+REST_FRAMEWORK = {
+    # Customize error handling
+    'EXCEPTION_HANDLER': 'apps.exceptions.core_exception_handler',
+    'NON_FIELD_ERRORS_KEY': 'error',
+}
+
 AUTH_USER_MODEL = 'users.User'
 
 JWTOKEN_PREFIX = 'Token'

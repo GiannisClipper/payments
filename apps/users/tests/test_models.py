@@ -213,19 +213,19 @@ class JWTokenTests(UserModelTests):
         with self.assertRaises(Exception):
             JWTokenHandler.decode_key(key)
 
-    def test_check_key_when_user_not_exists(self):
+    def test_check_when_key_is_expired(self):
         with self.assertRaises(Exception):
-            JWTokenHandler.check_key_if_user_exists(1)
+            JWTokenHandler.check_if_key_is_expired(1)
 
-    def test_check_key_when_user_not_active(self):
+    def test_check_when_user_in_key_not_exists(self):
+        with self.assertRaises(Exception):
+            JWTokenHandler.check_if_user_in_key_exists(1)
+
+    def test_check_when_user_in_key_is_not_active(self):
         user = User.objects.create_user(**self.samples[0])
         user.is_active = False
         with self.assertRaises(Exception):
-            JWTokenHandler.check_key_if_user_is_active(user)
-
-    def test_check_key_when_expired(self):
-        with self.assertRaises(Exception):
-            JWTokenHandler.check_key_expiration(1)
+            JWTokenHandler.check_if_user_in_key_is_active(user)
 
     def test_compose_header(self):
         payload, key = self.encode_key()

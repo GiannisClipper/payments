@@ -28,6 +28,33 @@ from .constants import (
 )
 
 
+error_messages = {
+    'username': {
+        'error_messages': {
+            'required': USERNAME_REQUIRED,
+            'null': USERNAME_REQUIRED,
+            'blank': USERNAME_REQUIRED,
+            'unique': USERNAME_EXISTS,
+        }
+    },
+    'password': {
+        'error_messages': {
+            'required': PASSWORD_REQUIRED,
+            'null': PASSWORD_REQUIRED,
+            'blank': PASSWORD_REQUIRED,
+            'min_length': PASSWORD_TOO_SHORT,
+        }
+    },
+    'email': {
+        'error_messages': {
+            'required': EMAIL_REQUIRED,
+            'null': EMAIL_REQUIRED,
+            'blank': EMAIL_REQUIRED,
+            'unique': EMAIL_EXISTS,
+        }
+    },
+}
+
 class UserManager(BaseUserManager):
     '''
     Custom `user` models must define their own manager class,
@@ -70,14 +97,16 @@ class User(AbstractBaseUser, PermissionsMixin):
         db_index=True,
         unique=True,
         null=False,
-        blank=False
+        blank=False,
+        error_messages = error_messages['username']['error_messages']
     )
 
     password = models.CharField(
         max_length=128,
         validators=[MinLengthValidator(PASSWORD_MIN_LENGTH)],
         null=False,
-        blank=False
+        blank=False,
+        error_messages = error_messages['password']['error_messages']
     )
 
     email = models.EmailField(
@@ -85,7 +114,8 @@ class User(AbstractBaseUser, PermissionsMixin):
         db_index=True,
         unique=True,
         null=False,
-        blank=False
+        blank=False,
+        error_messages = error_messages['email']['error_messages']
     )
 
     is_active = models.BooleanField(default=True)
@@ -96,33 +126,9 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     USERNAME_FIELD = 'username'  # Field is used to signin (ex. 'email')
 
+    saved_password = None  # Helps to identify and hash new passwords
+
     objects = UserManager()
-
-    def __init__(self, *args, **kwargs):
-        super(AbstractBaseUser, self).__init__(*args, **kwargs)
-        super(PermissionsMixin, self).__init__(*args, **kwargs)
-
-        # `error_messages` are used by `full_clean` method which is
-        # called before `save` method and database level constraints
-        field = self._meta.get_field('username')
-        field.error_messages['required'] = USERNAME_REQUIRED
-        field.error_messages['null'] = USERNAME_REQUIRED
-        field.error_messages['blank'] = USERNAME_REQUIRED
-        field.error_messages['unique'] = USERNAME_EXISTS
-
-        field = self._meta.get_field('password')
-        field.error_messages['required'] = PASSWORD_REQUIRED
-        field.error_messages['null'] = PASSWORD_REQUIRED
-        field.error_messages['blank'] = PASSWORD_REQUIRED
-        field.error_messages['min_length'] = PASSWORD_TOO_SHORT
-
-        field = self._meta.get_field('email')
-        field.error_messages['required'] = EMAIL_REQUIRED
-        field.error_messages['null'] = EMAIL_REQUIRED
-        field.error_messages['blank'] = EMAIL_REQUIRED
-        field.error_messages['unique'] = EMAIL_EXISTS
-
-        self.saved_password = self.password
 
     def save(self, *args, **kwargs):
 
@@ -162,7 +168,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
         now = datetime.timestamp(datetime.utcnow())
         expiration = now + JWTOKEN_DURATION
-        key = JWTokenHandler.encode_key(self.pk, expiration)
+        key = JWTokenHandler.encode_key({'user_id': self.pk, 'expiration': expiration})
 
         return key
 
@@ -207,7 +213,17 @@ class JWTokenHandler():
 
         return payload
 
-    def check_key_if_user_exists(id):
+    def check_if_key_is_expired(expiration):
+        '''Checks if the token is expired.'''
+
+        now = datetime.timestamp(datetime.utcnow())
+
+        if expiration <= now:
+            raise Exception(TOKEN_KEY_EXPIRED)
+
+        return expiration
+
+    def check_if_user_in_key_exists(id):
         '''Checks if the user's id in token exists in database.'''
 
         user = User.objects.get(pk=id)
@@ -217,20 +233,10 @@ class JWTokenHandler():
 
         return user
 
-    def check_key_if_user_is_active(user):
+    def check_if_user_in_key_is_active(user):
         '''Checks if the user in token is active.'''
 
         if not user.is_active:
             raise Exception(TOKEN_USER_NOT_ACTIVE)
 
         return user
-
-    def check_key_expiration(expiration):
-        '''Checks if the token is expired.'''
-
-        now = datetime.timestamp(datetime.utcnow())
-
-        if expiration <= now:
-            raise Exception(TOKEN_KEY_EXPIRED)
-
-        return expiration
