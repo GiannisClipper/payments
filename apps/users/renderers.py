@@ -2,7 +2,7 @@ from rest_framework.renderers import JSONRenderer
 import json
 
 
-# class GenericJSONRenderer(JSONRenderer): 
+# class GenericJSONRenderer(JSONRenderer):
 class GenericJSONRenderer:
 ### I faced an uresolved problem: Renderer did'nt send the modified data shape
 ### to response. So at the moment I use this hand-made renderer to get result

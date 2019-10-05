@@ -130,6 +130,11 @@ REST_FRAMEWORK = {
     # Customize error handling
     'EXCEPTION_HANDLER': 'apps.exceptions.core_exception_handler',
     'NON_FIELD_ERRORS_KEY': 'error',
+
+    # Custom auth backend to authenticate requests or not
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'apps.users.backends.JWTAuthentication',
+    )
 }
 
 AUTH_USER_MODEL = 'users.User'

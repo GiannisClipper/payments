@@ -55,6 +55,7 @@ error_messages = {
     },
 }
 
+
 class UserManager(BaseUserManager):
     '''
     Custom `user` models must define their own manager class,
@@ -98,7 +99,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         unique=True,
         null=False,
         blank=False,
-        error_messages = error_messages['username']['error_messages']
+        error_messages=error_messages['username']['error_messages']
     )
 
     password = models.CharField(
@@ -106,7 +107,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         validators=[MinLengthValidator(PASSWORD_MIN_LENGTH)],
         null=False,
         blank=False,
-        error_messages = error_messages['password']['error_messages']
+        error_messages=error_messages['password']['error_messages']
     )
 
     email = models.EmailField(
@@ -115,7 +116,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         unique=True,
         null=False,
         blank=False,
-        error_messages = error_messages['email']['error_messages']
+        error_messages=error_messages['email']['error_messages']
     )
 
     is_active = models.BooleanField(default=True)
@@ -168,7 +169,10 @@ class User(AbstractBaseUser, PermissionsMixin):
 
         now = datetime.timestamp(datetime.utcnow())
         expiration = now + JWTOKEN_DURATION
-        key = JWTokenHandler.encode_key({'user_id': self.pk, 'expiration': expiration})
+        key = JWTokenHandler.encode_key({
+            'user_id': self.pk, 
+            'expiration': expiration
+        })
 
         return key
 
