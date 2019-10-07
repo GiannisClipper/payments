@@ -40,6 +40,7 @@ INSTALLED_APPS = [
 
     # start custom settings
     'users',
+    'users.jwtokens',
     # end custom settings
 ]
 
@@ -133,7 +134,7 @@ REST_FRAMEWORK = {
 
     # Custom auth backend to authenticate requests or not
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'users.backends.JWTAuthentication',
+        'users.jwtokens.backends.JWTAuthentication',
     )
 }
 

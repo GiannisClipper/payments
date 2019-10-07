@@ -27,7 +27,6 @@ SIGNIN_URL = reverse('users:signin')
 CURRENT_URL = reverse('users:current')
 
 
-
 class UsersAPITests(TestCase):
 
     def create_user(self, **params):
@@ -39,23 +38,30 @@ class UsersAPITests(TestCase):
                 HTTP_AUTHORIZATION=f'{JWTOKEN_PREFIX} {token}'
             )
 
+        payload = self.samples[0] if not payload else payload
+        payload = {'user': payload}
         payload = json.dumps(payload)
+
         content_type = 'application/json'
 
         if method == 'POST':
             res = self.client.post(url, payload, content_type=content_type)
-        else:
+        elif method == 'PATCH':
+            res = self.client.patch(url, payload, content_type=content_type)
+        elif method == 'DELETE':
+            res = self.client.delete(url, payload, content_type=content_type)
+        else:  # GET
             res = self.client.get(url, content_type=content_type)
-            print(res.data)
 
         res.data = json.loads(res.data)
-        
+
         return res
 
     def setUp(self):
         self.samples = [
             {'username': 'user1', 'password': 'pass123', 'email': 'user1@testemail.org'},  # noqa: E501
             {'username': 'user2', 'password': 'pass234', 'email': 'user2@testemail.org'},  # noqa: E501
+            {'username': 'user3', 'password': 'pass345', 'email': 'user3@testemail.org'},  # noqa: E501
         ]
 
         self.client = APIClient()
@@ -65,7 +71,7 @@ class PublicUsersAPITests(UsersAPITests):
     '''Test users API requests that not require authentication'''
 
     def test_valid_signup(self):
-        payload = {'user': self.samples[0]}
+        payload = self.samples[0]
         res = self.send_json(SIGNUP_URL, 'POST', payload)
 
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
@@ -74,7 +80,7 @@ class PublicUsersAPITests(UsersAPITests):
         self.assertNotIn('password', res.data)
 
     def test_invalid_signup_when_values_are_empty_or_missing(self):
-        payload = {'user': {'username': '', 'password': ''}}
+        payload = {'username': '', 'password': ''}
         res = self.send_json(SIGNUP_URL, 'POST', payload)
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
@@ -87,7 +93,7 @@ class PublicUsersAPITests(UsersAPITests):
         self.create_user(**self.samples[0])
         self.create_user(**self.samples[1])
         self.samples[0]['password'] = '*'
-        payload = {'user': self.samples[0]}
+        payload = self.samples[0]
         res = self.send_json(SIGNUP_URL, 'POST', payload)
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
@@ -99,7 +105,7 @@ class PublicUsersAPITests(UsersAPITests):
     def test_valid_signin(self):
         self.create_user(**self.samples[0])
         self.create_user(**self.samples[1])
-        payload = {'user': self.samples[1]}
+        payload = self.samples[1]
         res = self.send_json(SIGNIN_URL, 'POST', payload)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -107,7 +113,7 @@ class PublicUsersAPITests(UsersAPITests):
         self.assertIn('token', res.data)
 
     def test_invalid_signin_when_values_are_empty(self):
-        payload = {'user': {'username': '', 'password': ''}}
+        payload = {'username': '', 'password': ''}
         res = self.send_json(SIGNIN_URL, 'POST', payload)
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
@@ -118,7 +124,7 @@ class PublicUsersAPITests(UsersAPITests):
     def test_invalid_signin_when_credentials_not_match(self):
         self.create_user(**self.samples[0])
         self.create_user(**self.samples[1])
-        payload = {'user': {'username': '*', 'password': '*'}}
+        payload = {'username': '*', 'password': '*'}
         res = self.send_json(SIGNIN_URL, 'POST', payload)
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
@@ -127,20 +133,81 @@ class PublicUsersAPITests(UsersAPITests):
 
 
 class PrivateUsersAPITests(UsersAPITests):
-    '''Test users API requests that require authentication'''
+    '''Test users API requests that require authentication.'''
 
-    def signin(self, payload):
+    def signin(self, payload=None):
         self.create_user(**self.samples[0])
         self.create_user(**self.samples[1])
+
         res = self.send_json(SIGNIN_URL, 'POST', payload)
 
-        return res
+        return res.data['user'], res.data['token']
 
-    def test_get_current_user(self):
-        payload = {'user': self.samples[0]}
-        signin_res = self.signin(payload)
-        print(signin_res.data)
-        token = signin_res.data['token']
+
+class CurrentUserAPITests(PrivateUsersAPITests):
+    '''Test current user API.'''
+
+    def test_retrieve(self):
+        user, token = self.signin()
         res = self.send_json(CURRENT_URL, 'GET', token=token)
 
-        self.assertIn('bla', signin_res.data)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(user['username'], res.data['user']['username'])
+        self.assertEqual(token, res.data['token'])
+
+    def test_valid_update(self):
+        user, token = self.signin()
+        payload = self.samples[2]
+        res = self.send_json(CURRENT_URL, 'PATCH', payload, token=token)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(user['id'], res.data['user']['id'])
+        self.assertEqual(payload['username'], res.data['user']['username'])
+        self.assertEqual(payload['email'], res.data['user']['email'])
+        self.assertEqual(token, res.data['token'])
+
+    def test_invalid_update_when_values_exists_or_invalid(self):
+        user, token = self.signin()
+        payload = self.samples[1]
+        payload['password'] = '*'
+        res = self.send_json(CURRENT_URL, 'PATCH', payload, token=token)
+
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('errors', res.data)
+        self.assertIn(USERNAME_EXISTS, res.data['errors']['username'])
+        self.assertIn(PASSWORD_TOO_SHORT, res.data['errors']['password'])
+        self.assertIn(EMAIL_EXISTS, res.data['errors']['email'])
+
+    def test_invalid_update_when_values_are_empty(self):
+        user, token = self.signin()
+        payload = self.samples[0]
+        payload['username'] = ''
+        payload['password'] = ''
+        payload['email'] = None
+        res = self.send_json(CURRENT_URL, 'PATCH', payload, token=token)
+
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('errors', res.data)
+        self.assertIn(USERNAME_REQUIRED, res.data['errors']['username'])
+        self.assertIn(PASSWORD_REQUIRED, res.data['errors']['password'])
+        self.assertIn(EMAIL_REQUIRED, res.data['errors']['email'])
+
+    def test_delete_valid(self):
+        user, token = self.signin()
+        payload = self.samples[0]
+        res = self.send_json(CURRENT_URL, 'DELETE', token=token)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual({}, res.data['user'])
+        self.assertEqual(token, res.data['token'])
+
+    def test_delete_invalid_when_not_authenticated(self):
+        user, token = self.signin()
+        payload = self.samples[0]
+        payload['password'] = 'bla'
+        res = self.send_json(CURRENT_URL, 'DELETE', token=token)
+
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('errors', res.data)
+        self.assertIn(INPUT_NOT_MATCH, res.data['errors'])
+        self.assertEqual(token, res.data['token'])

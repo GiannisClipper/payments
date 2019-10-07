@@ -60,9 +60,13 @@ class CurrentUserAPIView(RetrieveUpdateDestroyAPIView):
             user,
             context={'request': request}  # required by url field
         )
-        
+
         # ### return Response(serializer.data, status=status.HTTP_200_OK)
-        rendered_data = UserJSONRenderer().render(serializer.data)
+        rendered_data = UserJSONRenderer().render(
+            serializer.data,
+            renderer_context={'request': request}
+        )
+
         return Response(rendered_data, status=status.HTTP_200_OK)
 
     def update(self, request, *args, **kwargs):
@@ -70,23 +74,38 @@ class CurrentUserAPIView(RetrieveUpdateDestroyAPIView):
         data = request.data.get('user', {})
 
         serializer = self.serializer_class(
-            user, 
-            data=data, 
+            user,
+            data=data,
             partial=True,
             context={'request': request}  # required by url field
         )
+
         serializer.is_valid(raise_exception=True)
+
         serializer.save()
 
         # ### return Response(serializer.data, status=status.HTTP_200_OK)
-        rendered_data = UserJSONRenderer().render(serializer.data)
+        rendered_data = UserJSONRenderer().render(
+            serializer.data,
+            renderer_context={'request': request}
+        )
+
         return Response(rendered_data, status=status.HTTP_200_OK)
 
     def delete(self, request):
         user = self.get_queryset(request)
         data = request.data.get('user', {})
 
-        serializer = self.serializer_class(user, data=data)
+        serializer = self.serializer_class(
+            user,
+            data=data
+        )
+
         serializer.delete()
 
-        return Response({}, status=status.HTTP_200_OK)
+        rendered_data = UserJSONRenderer().render(
+            {},
+            renderer_context={'request': request}
+        )
+
+        return Response(rendered_data, status=status.HTTP_200_OK)

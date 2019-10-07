@@ -28,7 +28,7 @@ class SignupSerializer(serializers.ModelSerializer):
         write_only=True,
         validators=[
             MinLengthValidator(
-                PASSWORD_MIN_LENGTH, 
+                PASSWORD_MIN_LENGTH,
                 message=PASSWORD_TOO_SHORT
             )
         ],
@@ -52,7 +52,7 @@ class SignupSerializer(serializers.ModelSerializer):
 
 class SigninSerializer(serializers.Serializer):
     '''Authenticates a user & creates a token.'''
-    
+
     id = serializers.IntegerField(read_only=True)
 
     username = serializers.CharField(
@@ -90,36 +90,40 @@ class SigninSerializer(serializers.Serializer):
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     '''Handles serialization and deserialization of User objects.'''
-    
+
     id = serializers.SerializerMethodField(read_only=True)
 
-    def get_id(self, obj): 
+    def get_id(self, obj):
         return obj.pk
 
-    admin = serializers.SerializerMethodField(read_only=True)
-
-    def get_admin(self, obj): 
-        return obj.is_staff
-
     password = serializers.CharField(
-        max_length=128,
-        min_length=4,
-        write_only=True
+        write_only=True,
+        validators=[
+            MinLengthValidator(
+                PASSWORD_MIN_LENGTH,
+                message=PASSWORD_TOO_SHORT
+            )
+        ],
+        error_messages=error_messages['password']['error_messages']
     )
+
+    is_admin = serializers.SerializerMethodField(read_only=True)
+
+    def get_is_admin(self, obj):
+        return obj.is_staff
 
 #    url = serializers.HyperlinkedIdentityField(
 #        view_name='users:byid',
 #        lookup_field='id',
-#        read_only=True, 
+#        read_only=True,
 #    )
 
     class Meta:
         model = User
-        fields = ('id', 'username', 'password', 'email', 'admin', 'is_active',)  # 'url',)
+        fields = ('id', 'username', 'password', 'email', 'is_admin', 'is_active',)
+        # 'url',)
 
-        # Alternative to read_only=True, prefered
-        # cause don't want to specify anything else
-        # read_only_fields = ('token',)
+        extra_kwargs = error_messages
 
     def get(self, instance):
         return instance
@@ -139,11 +143,11 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 
     def delete(self):
         user = authenticate(
-            username=initial_data['username'],
-            password=initial_data['password']
+            username=self.initial_data['username'],
+            password=self.initial_data['password']
         )
 
-        if user is None or not user.is_active:
+        if not user or not user.is_active:
             raise serializers.ValidationError(INPUT_NOT_MATCH)
 
         user.delete()

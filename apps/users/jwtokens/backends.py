@@ -1,6 +1,6 @@
 from rest_framework import authentication
 
-from .models import User, JWTokenHandler
+from .handlers import JWTokenHandler
 
 
 class JWTAuthentication(authentication.BaseAuthentication):
