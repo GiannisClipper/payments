@@ -120,8 +120,10 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = User
-        fields = ('id', 'username', 'password', 'email', 'is_admin', 'is_active',)
-        # 'url',)
+        fields = (
+            'id', 'username', 'password', 'email', 'is_admin', 'is_active',  
+            # 'url'
+        )
 
         extra_kwargs = error_messages
 
@@ -141,15 +143,15 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 
         return instance
 
-    def delete(self):
-        user = authenticate(
+    def delete(self, instance):
+        signin_user = authenticate(
             username=self.initial_data['username'],
             password=self.initial_data['password']
         )
 
-        if not user or not user.is_active:
+        if not signin_user or not signin_user.is_active:
             raise serializers.ValidationError(INPUT_NOT_MATCH)
 
-        user.delete()
+        instance.delete()
 
         return None

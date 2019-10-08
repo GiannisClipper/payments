@@ -92,16 +92,13 @@ class CurrentUserAPIView(RetrieveUpdateDestroyAPIView):
 
         return Response(rendered_data, status=status.HTTP_200_OK)
 
-    def delete(self, request):
+    def delete(self, request, *args, **kwargs):
         user = self.get_queryset(request)
         data = request.data.get('user', {})
 
-        serializer = self.serializer_class(
-            user,
-            data=data
-        )
+        serializer = self.serializer_class(user, data=data)
 
-        serializer.delete()
+        serializer.delete(user)
 
         rendered_data = UserJSONRenderer().render(
             {},
@@ -109,3 +106,12 @@ class CurrentUserAPIView(RetrieveUpdateDestroyAPIView):
         )
 
         return Response(rendered_data, status=status.HTTP_200_OK)
+
+
+class UserByIdAPIView(CurrentUserAPIView):
+    permission_classes = (IsAdminUser,)
+    serializer_class = UserSerializer
+    # ### renderer_classes = (UserJSONRenderer,)
+
+    def get_queryset(self, request):
+        return get_object_or_404(User, pk=self.kwargs['id'])
