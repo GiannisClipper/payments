@@ -23,3 +23,6 @@ class PrivateUsersAPITests(UsersAPITests):
         res = self.api_request(SIGNIN_URL, 'POST', payload=payload)
 
         return res.data['user'], res.data['token']
+
+    def setUp(self):
+        super().setUp()

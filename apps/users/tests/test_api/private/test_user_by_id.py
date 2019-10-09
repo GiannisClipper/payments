@@ -19,7 +19,7 @@ BY_ID_3_URL = reverse('users:byid', kwargs={'id': 3})
 
 
 class UserByIdWithoutPermissionAPITests(PrivateUsersAPITests):
-    '''Test user by id API whithout auth permission.'''
+    '''Test user by id API whithout permission.'''
 
     def request_without_permission(self, method):
         user, token = self.signin()

@@ -5,6 +5,7 @@ from .views import (
     SigninAPIView,
     CurrentUserAPIView,
     UserByIdAPIView,
+    AllUsersAPIView,
 )
 
 app_name = 'users'
@@ -18,4 +19,6 @@ urlpatterns = [
 
     path('<int:id>/', UserByIdAPIView.as_view(), name='byid'),
     # POST, GET, PATCH, DELETE
+
+    path('list/', AllUsersAPIView.as_view(), name='list'),  # GET
 ]

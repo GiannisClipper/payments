@@ -2,14 +2,15 @@ from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.generics import RetrieveUpdateDestroyAPIView, \
-                                    RetrieveAPIView
+from rest_framework.generics import (
+    RetrieveUpdateDestroyAPIView, RetrieveAPIView,
+)
 
 from django.shortcuts import get_object_or_404
 
 from .models import User
 from .serializers import SignupSerializer, SigninSerializer, UserSerializer
-from .renderers import UserJSONRenderer  # , UsersJSONRenderer
+from .renderers import UserJSONRenderer, UsersJSONRenderer
 
 
 class SignupAPIView(APIView):
@@ -115,3 +116,53 @@ class UserByIdAPIView(CurrentUserAPIView):
 
     def get_queryset(self, request):
         return get_object_or_404(User, pk=self.kwargs['id'])
+
+
+class AllUsersAPIView(RetrieveAPIView):
+    permission_classes = (IsAdminUser,)
+    serializer_class = UserSerializer
+    # ### renderer_classes = (UsersJSONRenderer,)
+
+    def get_queryset(self):
+        return User.objects.all()
+
+    def retrieve(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+
+        serializer = self.serializer_class(
+            queryset,
+            many=True,
+            context={'request': request}  # required by url field
+        )
+
+        # ### return Response(serializer.data, status=status.HTTP_200_OK)
+        rendered_data = UsersJSONRenderer().render(
+            serializer.data,
+            renderer_context={'request': request}
+        )
+
+        return Response(rendered_data, status=status.HTTP_200_OK)
+
+
+class AdminUsersAPIView(AllUsersAPIView):
+
+    def get_queryset(self):
+        return User.objects.filter(is_staff=True)
+
+
+class NoAdminUsersAPIView(AllUsersAPIView):
+
+    def get_queryset(self):
+        return User.objects.filter(is_staff=False)
+
+
+class ActiveUsersAPIView(AllUsersAPIView):
+
+    def get_queryset(self):
+        return User.objects.filter(is_active=True)
+
+
+class NoActiveUsersAPIView(AllUsersAPIView):
+
+    def get_queryset(self):
+        return User.objects.filter(is_active=False)
