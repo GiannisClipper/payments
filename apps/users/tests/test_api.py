@@ -249,6 +249,7 @@ class UserByIdAPITests(PrivateUsersAPITests):
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertNotEqual(user['username'], res.data['user']['username'])
+        self.assertIn(f"/users/{res.data['user']['id']}/", res.data['user']['url'])
         self.assertEqual(token, res.data['token'])
 
     def test_valid_update(self):

@@ -112,17 +112,27 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
     def get_is_admin(self, obj):
         return obj.is_staff
 
-#    url = serializers.HyperlinkedIdentityField(
-#        view_name='users:byid',
-#        lookup_field='id',
-#        read_only=True,
-#    )
+    url = serializers.HyperlinkedIdentityField(
+        view_name='users:byid',
+        lookup_field='id',
+        read_only=True,
+    )
+
+    # More hand-made way of getting url:
+
+    # url = serializers.SerializerMethodField(read_only=True)
+
+    # def get_url(self, obj):
+    #     from django.contrib.sites.shortcuts import get_current_site
+    #     domain = get_current_site(context['request']).domain
+    #     path = reverse('users:byid', kwargs={'id': obj.id})
+    #     return f'http://{domain}{path}'
 
     class Meta:
         model = User
         fields = (
-            'id', 'username', 'password', 'email', 'is_admin', 'is_active',  
-            # 'url'
+            'id', 'username', 'password', 'email', 'is_admin', 'is_active',
+            'url'
         )
 
         extra_kwargs = error_messages

@@ -16,6 +16,6 @@ urlpatterns = [
     path('current/', CurrentUserAPIView.as_view(), name='current'),
     # POST, GET, PATCH, DELETE
 
-    path('byid/<int:id>/', UserByIdAPIView.as_view(), name='byid'),
+    path('<int:id>/', UserByIdAPIView.as_view(), name='byid'),
     # POST, GET, PATCH, DELETE
 ]
