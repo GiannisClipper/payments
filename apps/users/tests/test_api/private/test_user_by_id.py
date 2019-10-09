@@ -14,50 +14,48 @@ from users.constants import (
     INPUT_NOT_MATCH,
 )
 
-BY_ID_2_URL = reverse('users:byid', kwargs={'id': 2})
-BY_ID_3_URL = reverse('users:byid', kwargs={'id': 3})
+BY_ID_2_URL = reverse('users:by-id', kwargs={'id': 2})
+BY_ID_3_URL = reverse('users:by-id', kwargs={'id': 3})
 
 
-class UserByIdWithoutPermissionAPITests(PrivateUsersAPITests):
-    '''Test user by id API whithout permission.'''
+class PostUserByIdWhenNotAccessible(PrivateUsersAPITests):
+    '''Test POST user-by-id API when it should not accessible.'''
 
-    def request_without_permission(self, method):
+    METHOD = 'Post'
+
+    def test_invalid_request_without_permission(self):
         user, token = self.signin()
-        res = self.api_request(BY_ID_2_URL, method, token=token)
+        res = self.api_request(BY_ID_2_URL, self.METHOD, token=token)
 
         self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
         self.assertIn('errors', res.data)
         self.assertEqual(token, res.data['token'])
 
-    def test_invalid_retrieve_without_permission(self):
-        self.request_without_permission(method='GET')
-
-    def test_invalid_update_without_permission(self):
-        self.request_without_permission(method='PATCH')
-
-    def test_invalid_delete_without_permission(self):
-        self.request_without_permission(method='DELETE')
-
-
-class UserByIdWhenNotFoundAPITests(PrivateUsersAPITests):
-    '''Test user by id API when id not found.'''
-
-    def request_an_id_that_not_exists(self, method):
+    def test_invalid_request_when_id_not_exists(self):
         user, token = self.signin_as_admin()
-        res = self.api_request(BY_ID_3_URL, method, token=token)
+        res = self.api_request(BY_ID_3_URL, self.METHOD, token=token)
 
         self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
         self.assertIn('errors', res.data)
         self.assertEqual(token, res.data['token'])
 
-    def test_invalid_retrieve_when_not_found(self):
-        self.request_an_id_that_not_exists(method='GET')
 
-    def test_invalid_update_when_not_found(self):
-        self.request_an_id_that_not_exists(method='PATCH')
+class GetUserByIdWhenNotAccessible(PostUserByIdWhenNotAccessible):
+    '''Test GET user-by-id API when it should not accessible.'''
 
-    def test_invalid_delete_when_not_found(self):
-        self.request_an_id_that_not_exists(method='DELETE')
+    METHOD = 'GET'
+
+
+class PatchUserByIdWhenNotAccessible(PostUserByIdWhenNotAccessible):
+    '''Test PATCH user-by-id API when it should not accessible.'''
+
+    METHOD = 'PATCH'
+
+
+class DeleteUserByIdWhenNotAccessible(PostUserByIdWhenNotAccessible):
+    '''Test DELETE user-by-id API when it should not accessible.'''
+
+    METHOD = 'DELETE'
 
 
 class UserByIdAPITests(PrivateUsersAPITests):

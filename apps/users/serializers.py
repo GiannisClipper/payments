@@ -113,7 +113,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         return obj.is_staff
 
     url = serializers.HyperlinkedIdentityField(
-        view_name='users:byid',
+        view_name='users:by-id',
         lookup_field='id',
         read_only=True,
     )
