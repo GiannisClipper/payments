@@ -75,15 +75,15 @@ class UserModelBasicTests(UserModelTests):
 
         self.assertEqual(user.pk, None)
 
-    def test_user_str_representation(self):
+    def test_str_representation(self):
         user = User.objects.create_user(**self.samples[0])
 
-        self.assertEqual(self.samples[0]['username'], str(user))
+        self.assertEqual(str(user), self.samples[0]['username'])
 
 
 class UserModelValidationOnCreateTests(UserModelTests):
 
-    def test_required_fields_errors(self):
+    def test_required_errors(self):
         errors = ''
         del self.samples[0]['username']
         del self.samples[0]['password']
@@ -98,7 +98,7 @@ class UserModelValidationOnCreateTests(UserModelTests):
         self.assertIn(PASSWORD_REQUIRED, errors)
         self.assertIn(EMAIL_REQUIRED, errors)
 
-    def test_required_fields_errors_by_passing_empty_values(self):
+    def test_required_errors_by_passing_empty_values(self):
         errors = ''
         self.samples[0]['username'] = '        '
         self.samples[0]['password'] = '        '
@@ -113,7 +113,7 @@ class UserModelValidationOnCreateTests(UserModelTests):
         self.assertIn(PASSWORD_REQUIRED, errors)
         self.assertIn(EMAIL_REQUIRED, errors)
 
-    def test_unique_fields_errors(self):
+    def test_unique_errors(self):
         errors = ''
         User.objects.create_user(**self.samples[0])
 
@@ -148,7 +148,7 @@ class UserModelValidationOnCreateTests(UserModelTests):
 
 class UserModelValidationOnUpdateTests(UserModelTests):
 
-    def test_required_fields_errors_by_passing_empty_values(self):
+    def test_required_errors_by_passing_empty_values(self):
         errors = ''
         user = User.objects.create_user(**self.samples[0])
         self.samples[0]['username'] = '        '
@@ -164,7 +164,7 @@ class UserModelValidationOnUpdateTests(UserModelTests):
         self.assertIn(PASSWORD_REQUIRED, errors)
         self.assertIn(EMAIL_REQUIRED, errors)
 
-    def test_unique_fields_errors(self):
+    def test_unique_errors(self):
         errors = ''
         User.objects.create_user(**self.samples[0])
         user = User.objects.create_user(**self.samples[1])

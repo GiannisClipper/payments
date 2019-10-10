@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     # start custom settings
     'users',
     'users.jwtokens',
+    'funds',
     # end custom settings
 ]
 
