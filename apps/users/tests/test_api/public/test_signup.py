@@ -43,8 +43,8 @@ class SignupAPITests(PublicUsersAPITests):
     def test_invalid_signup_when_values_exists_or_invalid(self):
         self.create_user(**self.samples[0])
         self.create_user(**self.samples[1])
-        self.samples[0]['password'] = '*'
         payload = self.samples[0]
+        payload['password'] = '*'
         res = self.api_request(SIGNUP_URL, 'POST', payload=payload)
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)

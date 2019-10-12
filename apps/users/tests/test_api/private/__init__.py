@@ -8,7 +8,7 @@ SIGNIN_URL = reverse('users:signin')
 class PrivateUsersAPITests(UsersAPITests):
     '''Test users API requests that require authentication.'''
 
-    def signin(self, payload=None):
+    def signin(self, payload):
         self.create_user(**self.samples[0])
         self.create_user(**self.samples[1])
 
@@ -16,7 +16,7 @@ class PrivateUsersAPITests(UsersAPITests):
 
         return res.data['user'], res.data['token']
 
-    def signin_as_admin(self, payload=None):
+    def signin_as_admin(self, payload):
         self.create_admin(**self.samples[0])
         self.create_admin(**self.samples[1])
 

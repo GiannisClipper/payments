@@ -20,7 +20,8 @@ class AllUsersListAPITests(PrivateUsersAPITests):
         self.create_admin(**self.samples[4])
 
     def test_retrieve_(self):
-        user, token = self.signin_as_admin()
+        payload = self.samples[0]
+        user, token = self.signin_as_admin(payload)
         res = self.api_request(self.LIST_URL, 'GET', token=token)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -29,7 +30,8 @@ class AllUsersListAPITests(PrivateUsersAPITests):
         self.assertEqual(token, res.data['token'])
 
     def test_invalid_retrieve_without_permission(self):
-        user, token = self.signin()
+        payload = self.samples[0]
+        user, token = self.signin(payload)
         res = self.api_request(self.LIST_URL, 'GET', token=token)
 
         self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)

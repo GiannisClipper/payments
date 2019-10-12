@@ -21,15 +21,17 @@ class CurrentUserAPITests(PrivateUsersAPITests):
     '''Test current user API.'''
 
     def test_retrieve(self):
-        user, token = self.signin()
-        res = self.api_request(CURRENT_URL, 'GET', token=token)
+        payload = self.samples[0]
+        user, token = self.signin(payload)
+        res = self.api_request(CURRENT_URL, 'GET', payload, token=token)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(user['username'], res.data['user']['username'])
         self.assertEqual(token, res.data['token'])
 
     def test_valid_update(self):
-        user, token = self.signin()
+        payload = self.samples[0]
+        user, token = self.signin(payload)
         payload = self.samples[2]
         res = self.api_request(
             CURRENT_URL, 'PATCH', payload=payload, token=token
@@ -42,7 +44,8 @@ class CurrentUserAPITests(PrivateUsersAPITests):
         self.assertEqual(token, res.data['token'])
 
     def test_invalid_update_when_values_exists_or_invalid(self):
-        user, token = self.signin()
+        payload = self.samples[0]
+        user, token = self.signin(payload)
         payload = self.samples[1]
         payload['password'] = '*'
         res = self.api_request(
@@ -57,8 +60,8 @@ class CurrentUserAPITests(PrivateUsersAPITests):
         self.assertEqual(token, res.data['token'])
 
     def test_invalid_update_when_values_are_empty(self):
-        user, token = self.signin()
         payload = self.samples[0]
+        user, token = self.signin(payload)
         payload['username'] = ''
         payload['password'] = ''
         payload['email'] = None
@@ -74,8 +77,8 @@ class CurrentUserAPITests(PrivateUsersAPITests):
         self.assertEqual(token, res.data['token'])
 
     def test_valid_delete(self):
-        user, token = self.signin()
         payload = self.samples[0]
+        user, token = self.signin(payload)
         res = self.api_request(
             CURRENT_URL, 'DELETE', payload=payload, token=token
         )
@@ -85,9 +88,9 @@ class CurrentUserAPITests(PrivateUsersAPITests):
         self.assertEqual(token, res.data['token'])
 
     def test_invalid_delete_when_not_authenticate_well(self):
-        user, token = self.signin()
         payload = self.samples[0]
-        payload['password'] = 'bla'
+        user, token = self.signin(payload)
+        payload['password'] = 'blabla'
         res = self.api_request(
             CURRENT_URL, 'DELETE', payload=payload, token=token
         )

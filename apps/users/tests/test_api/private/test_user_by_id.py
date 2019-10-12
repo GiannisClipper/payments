@@ -24,7 +24,8 @@ class PostUserByIdWhenNotAccessible(PrivateUsersAPITests):
     METHOD = 'Post'
 
     def test_invalid_request_without_permission(self):
-        user, token = self.signin()
+        payload = self.samples[0]
+        user, token = self.signin(payload)
         res = self.api_request(BY_ID_2_URL, self.METHOD, token=token)
 
         self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
@@ -32,7 +33,8 @@ class PostUserByIdWhenNotAccessible(PrivateUsersAPITests):
         self.assertEqual(token, res.data['token'])
 
     def test_invalid_request_when_id_not_exists(self):
-        user, token = self.signin_as_admin()
+        payload = self.samples[0]
+        user, token = self.signin_as_admin(payload)
         res = self.api_request(BY_ID_3_URL, self.METHOD, token=token)
 
         self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
@@ -62,7 +64,8 @@ class UserByIdAPITests(PrivateUsersAPITests):
     '''Test user by id API.'''
 
     def test_valid_retrieve(self):
-        user, token = self.signin_as_admin()
+        payload = self.samples[0]
+        user, token = self.signin_as_admin(payload)
         res = self.api_request(BY_ID_2_URL, 'GET', token=token)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -73,7 +76,8 @@ class UserByIdAPITests(PrivateUsersAPITests):
         self.assertEqual(token, res.data['token'])
 
     def test_valid_update(self):
-        user, token = self.signin_as_admin()
+        payload = self.samples[0]
+        user, token = self.signin_as_admin(payload)
         payload = self.samples[2]
         res = self.api_request(
             BY_ID_2_URL, 'PATCH', payload=payload, token=token
@@ -86,8 +90,8 @@ class UserByIdAPITests(PrivateUsersAPITests):
         self.assertEqual(token, res.data['token'])
 
     def test_invalid_update_when_values_exists_or_invalid(self):
-        user, token = self.signin_as_admin()
         payload = self.samples[0]
+        user, token = self.signin_as_admin(payload)
         payload['password'] = '*'
         res = self.api_request(
             BY_ID_2_URL, 'PATCH', payload=payload, token=token
@@ -101,8 +105,8 @@ class UserByIdAPITests(PrivateUsersAPITests):
         self.assertEqual(token, res.data['token'])
 
     def test_invalid_update_when_values_are_empty(self):
-        user, token = self.signin_as_admin()
         payload = self.samples[0]
+        user, token = self.signin_as_admin(payload)
         payload['username'] = ''
         payload['password'] = ''
         payload['email'] = None
@@ -118,8 +122,8 @@ class UserByIdAPITests(PrivateUsersAPITests):
         self.assertEqual(token, res.data['token'])
 
     def test_valid_delete(self):
-        user, token = self.signin_as_admin()
         payload = self.samples[0]
+        user, token = self.signin_as_admin(payload)
         res = self.api_request(
             BY_ID_2_URL, 'DELETE', payload=payload, token=token
         )
@@ -129,9 +133,9 @@ class UserByIdAPITests(PrivateUsersAPITests):
         self.assertEqual(token, res.data['token'])
 
     def test_invalid_delete_when_not_authenticate_well(self):
-        user, token = self.signin_as_admin()
         payload = self.samples[0]
-        payload['password'] = 'bla'
+        user, token = self.signin_as_admin(payload)
+        payload['password'] = 'blabla'
         res = self.api_request(
             BY_ID_2_URL, 'DELETE', payload=payload, token=token
         )

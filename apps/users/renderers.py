@@ -1,4 +1,4 @@
-from apps.renderers import GenericJSONRenderer
+from core.renderers import GenericJSONRenderer
 
 
 class UserJSONRenderer(GenericJSONRenderer):
