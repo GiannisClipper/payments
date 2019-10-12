@@ -4,11 +4,7 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, \
 
 from django.core.validators import MinLengthValidator
 
-from datetime import datetime
-
-from .jwtokens.handlers import JWTokenHandler
-
-from apps.settings import JWTOKEN_DURATION
+from .jwtokens.models import JWToken
 
 from .constants import (
     USERNAME_REQUIRED,
@@ -82,7 +78,7 @@ class UserManager(BaseUserManager):
         return user
 
 
-class User(AbstractBaseUser, PermissionsMixin):
+class User(AbstractBaseUser, PermissionsMixin, JWToken):
     '''Defines a custom user model.'''
 
     username = models.CharField(
@@ -154,16 +150,3 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.username
-
-    @property  # This decorator defines a dynamic property
-    def token(self):
-        '''Generates a JSON Web Token with user info and expiry time.'''
-
-        now = datetime.timestamp(datetime.utcnow())
-        expiration = now + JWTOKEN_DURATION
-        key = JWTokenHandler.encode_key({
-            'user_id': self.pk,
-            'expiration': expiration
-        })
-
-        return key

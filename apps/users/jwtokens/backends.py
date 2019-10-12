@@ -1,11 +1,12 @@
 from rest_framework import authentication
 
-from .handlers import JWTokenHandler
+from django.contrib.auth import get_user_model
 
 
 class JWTAuthentication(authentication.BaseAuthentication):
 
     def authenticate(self, request):
+
         request.user = None
 
         auth_header = authentication.get_authorization_header(request)
@@ -13,17 +14,20 @@ class JWTAuthentication(authentication.BaseAuthentication):
         if not auth_header:
             return None
 
-        token = JWTokenHandler.decompose_header(auth_header)
+        token = get_user_model().decompose_token_header(auth_header)
 
         return self._authenticate_credentials(request, token)
 
     def _authenticate_credentials(self, request, token):
-        payload = JWTokenHandler.decode_key(token)
 
-        user = JWTokenHandler.check_if_user_in_key_exists(payload['user_id'])
+        payload = get_user_model().decode_token_key(token)
 
-        JWTokenHandler.check_if_user_in_key_is_active(user)
+        user_id, expiration = payload.values()
 
-        JWTokenHandler.check_if_key_is_expired(payload['expiration'])
+        user = get_user_model().check_if_user_in_token_exists(user_id)
+
+        get_user_model().check_if_user_in_token_is_active(user)
+
+        get_user_model().check_if_token_is_expired(expiration)
 
         return (user, token)
