@@ -1,29 +1,13 @@
-from django.test import TestCase
-from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 
 from unittest import skip  # noqa: F401
 
 from funds.models import Fund
+from funds.tests import FundsTests
 
 
-class FundModelTests(TestCase):
-
-    def setUp(self):
-        self.user1 = get_user_model().objects.create_user(
-            **{'username': 'user1', 'password': 'pass123', 'email': 'user1@testemail.org'},  # noqa: E501
-        )
-        self.user2 = get_user_model().objects.create_user(
-            **{'username': 'user2', 'password': 'pass234', 'email': 'user2@testemail.org'},  # noqa: E501
-        )
-
-        self.samples = [
-            {'user': self.user1, 'code': '1', 'name': 'CASH'},
-            {'user': self.user1, 'code': '2', 'name': 'VISA'},
-            {'user': self.user1, 'code': '3', 'name': 'MASTERCARD'},
-            {'user': self.user2, 'code': '1', 'name': 'CASH'},
-            {'user': self.user2, 'code': '2', 'name': 'PREPAID CARD'},
-        ]
+class FundModelTests(FundsTests):
+    pass
 
 
 class FundModelBasicTests(FundModelTests):
@@ -43,13 +27,10 @@ class FundModelBasicTests(FundModelTests):
         self.assertEqual(fund.name, self.samples[0]['name'])
 
     def test_update(self):
-        init_fund = Fund.objects.create(**self.samples[0])
-        fund = init_fund.update(**self.samples[1])
+        fund1 = Fund.objects.create(**self.samples[0])
+        fund2 = fund1.update(**self.samples[1])
 
-        self.assertEqual(fund.pk, init_fund.pk)
-        self.assertEqual(fund.user.id, self.samples[1]['user'].id)
-        self.assertEqual(fund.code, self.samples[1]['code'])
-        self.assertEqual(fund.name, self.samples[1]['name'])
+        self.assertEqual(fund1, fund2)
 
     def test_delete(self):
         fund = Fund.objects.create(**self.samples[0])
@@ -108,6 +89,7 @@ class FundModelValidationOnCreateTests(FundModelTests):
         self.assertEqual(2, len(errors['__all__']))
 
     def test_valid_same_fields_for_different_users(self):
+        self.samples[0]['user'] = self.user1
         fund1 = Fund.objects.create(**self.samples[0])
         self.samples[0]['user'] = self.user2
         fund2 = Fund.objects.create(**self.samples[0])
@@ -149,6 +131,7 @@ class FundModelValidationOnUpdateTests(FundModelTests):
         self.assertEqual(2, len(errors['__all__']))
 
     def test_valid_same_fields_for_different_users(self):
+        self.samples[0]['user'] = self.user1
         fund1 = Fund.objects.create(**self.samples[0])
         fund2 = Fund.objects.create(**self.samples[1])
         self.samples[0]['user'] = self.user2

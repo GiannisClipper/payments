@@ -20,10 +20,12 @@ CURRENT_URL = reverse('users:current')
 class CurrentUserAPITests(PrivateUsersAPITests):
     '''Test current user API.'''
 
+    URL = CURRENT_URL
+
     def test_retrieve(self):
         payload = self.samples[0]
         user, token = self.signin(payload)
-        res = self.api_request(CURRENT_URL, 'GET', payload, token=token)
+        res = self.api_request(self.URL, 'GET', payload, token=token)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(user['username'], res.data['user']['username'])
@@ -34,7 +36,7 @@ class CurrentUserAPITests(PrivateUsersAPITests):
         user, token = self.signin(payload)
         payload = self.samples[2]
         res = self.api_request(
-            CURRENT_URL, 'PATCH', payload=payload, token=token
+            self.URL, 'PATCH', payload=payload, token=token
         )
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -49,7 +51,7 @@ class CurrentUserAPITests(PrivateUsersAPITests):
         payload = self.samples[1]
         payload['password'] = '*'
         res = self.api_request(
-            CURRENT_URL, 'PATCH', payload=payload, token=token
+            self.URL, 'PATCH', payload=payload, token=token
         )
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
@@ -66,7 +68,7 @@ class CurrentUserAPITests(PrivateUsersAPITests):
         payload['password'] = ''
         payload['email'] = None
         res = self.api_request(
-            CURRENT_URL, 'PATCH', payload=payload, token=token
+            self.URL, 'PATCH', payload=payload, token=token
         )
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
@@ -80,7 +82,7 @@ class CurrentUserAPITests(PrivateUsersAPITests):
         payload = self.samples[0]
         user, token = self.signin(payload)
         res = self.api_request(
-            CURRENT_URL, 'DELETE', payload=payload, token=token
+            self.URL, 'DELETE', payload=payload, token=token
         )
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -92,7 +94,7 @@ class CurrentUserAPITests(PrivateUsersAPITests):
         user, token = self.signin(payload)
         payload['password'] = 'blabla'
         res = self.api_request(
-            CURRENT_URL, 'DELETE', payload=payload, token=token
+            self.URL, 'DELETE', payload=payload, token=token
         )
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)

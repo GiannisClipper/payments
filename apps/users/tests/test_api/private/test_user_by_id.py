@@ -4,6 +4,8 @@ from django.urls import reverse
 
 from rest_framework import status
 
+from .test_current_user import CurrentUserAPITests
+
 from users.constants import (
     USERNAME_REQUIRED,
     USERNAME_EXISTS,
@@ -14,54 +16,19 @@ from users.constants import (
     INPUT_NOT_MATCH,
 )
 
+BY_ID_1_URL = reverse('users:by-id', kwargs={'id': 1})
 BY_ID_2_URL = reverse('users:by-id', kwargs={'id': 2})
 BY_ID_3_URL = reverse('users:by-id', kwargs={'id': 3})
 
 
-class PostUserByIdWhenNotAccessible(PrivateUsersAPITests):
-    '''Test POST user-by-id API when it should not accessible.'''
+class OwnerAccessUserByIdAPITests(CurrentUserAPITests):
+    '''Test user-by-id API by owner.'''
 
-    METHOD = 'Post'
-
-    def test_invalid_request_without_permission(self):
-        payload = self.samples[0]
-        user, token = self.signin(payload)
-        res = self.api_request(BY_ID_2_URL, self.METHOD, token=token)
-
-        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertIn('errors', res.data)
-        self.assertEqual(token, res.data['token'])
-
-    def test_invalid_request_when_id_not_exists(self):
-        payload = self.samples[0]
-        user, token = self.signin_as_admin(payload)
-        res = self.api_request(BY_ID_3_URL, self.METHOD, token=token)
-
-        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
-        self.assertIn('errors', res.data)
-        self.assertEqual(token, res.data['token'])
+    URL = BY_ID_1_URL
 
 
-class GetUserByIdWhenNotAccessible(PostUserByIdWhenNotAccessible):
-    '''Test GET user-by-id API when it should not accessible.'''
-
-    METHOD = 'GET'
-
-
-class PatchUserByIdWhenNotAccessible(PostUserByIdWhenNotAccessible):
-    '''Test PATCH user-by-id API when it should not accessible.'''
-
-    METHOD = 'PATCH'
-
-
-class DeleteUserByIdWhenNotAccessible(PostUserByIdWhenNotAccessible):
-    '''Test DELETE user-by-id API when it should not accessible.'''
-
-    METHOD = 'DELETE'
-
-
-class UserByIdAPITests(PrivateUsersAPITests):
-    '''Test user by id API.'''
+class AdminAccessUserByIdAPITests(PrivateUsersAPITests):
+    '''Test user-by-id API by admin.'''
 
     def test_valid_retrieve(self):
         payload = self.samples[0]
@@ -144,3 +111,45 @@ class UserByIdAPITests(PrivateUsersAPITests):
         self.assertIn('errors', res.data)
         self.assertIn(INPUT_NOT_MATCH, res.data['errors'])
         self.assertEqual(token, res.data['token'])
+
+
+class PostUserByIdWhenNotAccessible(PrivateUsersAPITests):
+    '''Test POST user-by-id API when it should/ could not accessed.'''
+
+    METHOD = 'Post'
+
+    def test_invalid_request_without_permission(self):
+        payload = self.samples[0]
+        user, token = self.signin(payload)
+        res = self.api_request(BY_ID_2_URL, self.METHOD, token=token)
+
+        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertIn('errors', res.data)
+        self.assertEqual(token, res.data['token'])
+
+    def test_invalid_request_when_id_not_exists(self):
+        payload = self.samples[0]
+        user, token = self.signin_as_admin(payload)
+        res = self.api_request(BY_ID_3_URL, self.METHOD, token=token)
+
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertIn('errors', res.data)
+        self.assertEqual(token, res.data['token'])
+
+
+class GetUserByIdWhenNotAccessible(PostUserByIdWhenNotAccessible):
+    '''Test GET user-by-id API when it should/ could not accessed'''
+
+    METHOD = 'GET'
+
+
+class PatchUserByIdWhenNotAccessible(PostUserByIdWhenNotAccessible):
+    '''Test PATCH user-by-id API when it should/ could not accessed'''
+
+    METHOD = 'PATCH'
+
+
+class DeleteUserByIdWhenNotAccessible(PostUserByIdWhenNotAccessible):
+    '''Test DELETE user-by-id API when it should/ could not accessed'''
+
+    METHOD = 'DELETE'

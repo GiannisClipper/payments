@@ -9,6 +9,7 @@ from rest_framework.generics import (
 from django.shortcuts import get_object_or_404
 
 from .models import User
+from .permissions import IsAdminUserOrOwner
 from .serializers import SignupSerializer, SigninSerializer, UserSerializer
 from .renderers import UserJSONRenderer, UsersJSONRenderer
 
@@ -51,11 +52,11 @@ class CurrentUserAPIView(RetrieveUpdateDestroyAPIView):
     serializer_class = UserSerializer
     # ### renderer_classes = (UserJSONRenderer,)
 
-    def get_queryset(self, request):
-        return request.user
+    def get_object(self):
+        return self.request.user
 
     def retrieve(self, request, *args, **kwargs):
-        user = self.get_queryset(request)
+        user = self.get_object()
 
         serializer = self.serializer_class(
             user,
@@ -71,7 +72,7 @@ class CurrentUserAPIView(RetrieveUpdateDestroyAPIView):
         return Response(rendered_data, status=status.HTTP_200_OK)
 
     def update(self, request, *args, **kwargs):
-        user = self.get_queryset(request)
+        user = self.get_object()
         data = request.data.get('user', {})
 
         serializer = self.serializer_class(
@@ -94,7 +95,7 @@ class CurrentUserAPIView(RetrieveUpdateDestroyAPIView):
         return Response(rendered_data, status=status.HTTP_200_OK)
 
     def delete(self, request, *args, **kwargs):
-        user = self.get_queryset(request)
+        user = self.get_object()
         data = request.data.get('user', {})
 
         serializer = self.serializer_class(user, data=data)
@@ -110,12 +111,14 @@ class CurrentUserAPIView(RetrieveUpdateDestroyAPIView):
 
 
 class UserByIdAPIView(CurrentUserAPIView):
-    permission_classes = (IsAdminUser,)
+    permission_classes = (IsAdminUserOrOwner,)
     serializer_class = UserSerializer
     # ### renderer_classes = (UserJSONRenderer,)
 
-    def get_queryset(self, request):
-        return get_object_or_404(User, pk=self.kwargs['id'])
+    def get_object(self):
+        obj = get_object_or_404(User, pk=self.kwargs['id'])
+        self.check_object_permissions(self.request, obj)
+        return obj
 
 
 class AllUsersAPIView(RetrieveAPIView):

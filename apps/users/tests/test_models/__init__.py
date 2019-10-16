@@ -1,10 +1,10 @@
-from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 
 from unittest import skip  # noqa: F401
 
 from users.models import User
+from users.tests import UsersTests
 
 from users.constants import (
     USERNAME_REQUIRED,
@@ -16,13 +16,8 @@ from users.constants import (
 )
 
 
-class UserModelTests(TestCase):
-
-    def setUp(self):
-        self.samples = [
-            {'username': 'user1', 'password': 'pass123', 'email': 'user1@testemail.org'},  # noqa: E501
-            {'username': 'user2', 'password': 'pass234', 'email': 'user2@testemail.org'},  # noqa: E501
-        ]
+class UserModelTests(UsersTests):
+    pass
 
 
 class UserModelBasicTests(UserModelTests):
