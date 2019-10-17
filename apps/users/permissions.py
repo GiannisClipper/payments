@@ -2,7 +2,7 @@ from rest_framework import permissions
 
 
 class IsAdminUserOrOwner(permissions.BasePermission):
-    '''Permits users to access their own objects.'''
+    '''Permits admins or owners to access users objects.'''
 
     message = 'No permission to access data.'
 
