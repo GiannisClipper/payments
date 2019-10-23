@@ -110,7 +110,7 @@ class FundModelValidationOnCreateTests(FundModelTests):
         self.assertIn('__all__', errors)
         self.assertEqual(2, len(errors['__all__']))
 
-    def test_valid_same_fields_for_different_users(self):
+    def test_same_values_to_other_users(self):
         user_ = self.samples['users'][0]
         user1 = get_user_model().objects.create_user(**user_)
         fund_ = self.samples['funds'][0]
@@ -164,7 +164,7 @@ class FundModelValidationOnUpdateTests(FundModelTests):
         self.assertIn('__all__', errors)
         self.assertEqual(2, len(errors['__all__']))
 
-    def test_valid_same_fields_for_different_users(self):
+    def test_same_values_to_other_users(self):
         user_ = self.samples['users'][0]
         user1 = get_user_model().objects.create_user(**user_)
         fund_ = self.samples['funds'][0]

@@ -2,7 +2,7 @@ from rest_framework import status
 
 from funds.tests.test_api import ROOT_URL, BY_ID_1_URL
 
-from . import OwnerPrivateFundsAPITests
+from . import OwnerPrivateFundsAPITests, AdminPrivateFundsAPITests
 
 
 class OwnerGetRequestsFundsAPI(OwnerPrivateFundsAPITests):
@@ -41,12 +41,14 @@ class OwnerPostRequestsFundsAPI(OwnerPrivateFundsAPITests):
         self.assertIn('errors', res.data)
         self.assertEqual(res.data['token'], self.token)
 
-    def test_when_values_are_empty(self):
+    def test_when_values_are_missing(self):
         sample = {}
         res = self.api_request(ROOT_URL, 'POST', payload=sample, token=self.token)
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('errors', res.data)
+        self.assertIn('code', res.data['errors'])
+        self.assertIn('name', res.data['errors'])
         self.assertEqual(res.data['token'], self.token)
 
 
@@ -70,11 +72,13 @@ class OwnerPatchRequestsFundsAPI(OwnerGetRequestsFundsAPI):
     def test_when_values_are_empty(self):
         sample = self.samples['funds'][0]
         self.create_fund(self.user, sample)
-        sample = {}
-        res = self.api_request(ROOT_URL, 'POST', payload=sample, token=self.token)
+        sample = {'user': None, 'code': None, 'name': None}
+        res = self.api_request(BY_ID_1_URL, 'PATCH', payload=sample, token=self.token)
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('errors', res.data)
+        self.assertIn('code', res.data['errors'])
+        self.assertIn('name', res.data['errors'])
         self.assertEqual(res.data['token'], self.token)
 
 
@@ -82,3 +86,31 @@ class OwnerDeleteRequestsFundsAPI(OwnerGetRequestsFundsAPI):
     '''Test owner's invalid DELETE requests to funds API.'''
 
     METHOD = 'DELETE'
+
+
+class AdminRequestsFundsAPI(AdminPrivateFundsAPITests):
+    '''Test admin's invalid requests to funds API.'''
+
+    def test_post_when_values_are_missing(self):
+        sample = {}
+        res = self.api_request(ROOT_URL, 'POST', payload=sample, token=self.token)
+
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('errors', res.data)
+        self.assertIn('user', res.data['errors'])
+        self.assertIn('code', res.data['errors'])
+        self.assertIn('name', res.data['errors'])
+        self.assertEqual(res.data['token'], self.token)
+
+    def test_patch_when_values_are_empty(self):
+        sample = self.samples['funds'][0]
+        self.create_fund(self.user, sample)
+        sample = {'user': None, 'code': None, 'name': None}
+        res = self.api_request(BY_ID_1_URL, 'PATCH', payload=sample, token=self.token)
+
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('errors', res.data)
+        self.assertIn('user', res.data['errors'])
+        self.assertIn('code', res.data['errors'])
+        self.assertIn('name', res.data['errors'])
+        self.assertEqual(res.data['token'], self.token)

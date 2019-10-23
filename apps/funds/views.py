@@ -20,7 +20,7 @@ class CreateFundAPIView(APIView):
     def post(self, request):
         fund = request.data.get('fund', {})
 
-        if not request.user.is_staff or 'user' not in fund.keys():
+        if not request.user.is_staff:
             fund['user'] = request.user.pk
 
         serializer = self.serializer_class(
