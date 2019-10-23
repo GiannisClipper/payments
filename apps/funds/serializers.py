@@ -1,11 +1,9 @@
 from rest_framework import serializers
 
-from django.db import models
-
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 
-from .models import Fund  #, error_messages
+from .models import Fund  # , error_messages
 
 
 class UserSerializerField(serializers.RelatedField):

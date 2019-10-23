@@ -20,11 +20,11 @@ class CreateFundAPIView(APIView):
     def post(self, request):
         fund = request.data.get('fund', {})
 
-        if not request.user.is_staff or not fund['user']:
+        if not request.user.is_staff or 'user' not in fund.keys():
             fund['user'] = request.user.pk
 
         serializer = self.serializer_class(
-            data=fund, 
+            data=fund,
             context={'request': request}
         )
         serializer.is_valid(raise_exception=True)

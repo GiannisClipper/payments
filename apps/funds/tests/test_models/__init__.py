@@ -66,9 +66,9 @@ class FundModelValidationOnCreateTests(FundModelTests):
     def test_required_errors(self):
         errors = ''
         fund_ = self.samples['funds'][0]
-        del fund_['user']
-        del fund_['code']
-        del fund_['name']
+        fund_.pop('user', None)
+        fund_.pop('code', None)
+        fund_.pop('name', None)
 
         try:
             Fund.objects.create(**fund_)
@@ -100,7 +100,7 @@ class FundModelValidationOnCreateTests(FundModelTests):
         user_ = self.samples['users'][0]
         user1 = get_user_model().objects.create_user(**user_)
         fund_ = self.samples['funds'][0]
-        fund1 = self.create_fund(user1, fund_)
+        self.create_fund(user1, fund_)
 
         try:
             self.create_fund(user1, fund_)
@@ -151,7 +151,7 @@ class FundModelValidationOnUpdateTests(FundModelTests):
         user_ = self.samples['users'][0]
         user1 = get_user_model().objects.create_user(**user_)
         fund_ = self.samples['funds'][0]
-        fund1 = self.create_fund(user1, fund_)
+        self.create_fund(user1, fund_)
         fund_ = self.samples['funds'][1]
         fund2 = self.create_fund(user1, fund_)
         fund_ = self.samples['funds'][0]

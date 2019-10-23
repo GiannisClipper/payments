@@ -1,7 +1,5 @@
 from django.test import TestCase
 
-from django.contrib.auth import get_user_model
-
 from funds.models import Fund
 
 
@@ -16,15 +14,16 @@ class FundsTests(TestCase):
             ],
 
             'funds': [
-                {'user': None, 'code': '1', 'name': 'CASH'},
-                {'user': None, 'code': '2', 'name': 'VISA'},
-                {'user': None, 'code': '3', 'name': 'MASTERCARD'},                
-                {'user': None, 'code': '1', 'name': 'CASH'},
-                {'user': None, 'code': '2', 'name': 'PREPAID CARD'},
+                {'code': '1', 'name': 'CASH'},
+                {'code': '2', 'name': 'VISA'},
+                {'code': '3', 'name': 'MASTERCARD'},
+                {'code': '1', 'name': 'CASH'},
+                {'code': '2', 'name': 'PREPAID CARD'},
             ],
         }
 
     def create_fund(self, user, fund):
+
         fund['user'] = user
-        
+
         return Fund.objects.create(**fund)

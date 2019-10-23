@@ -11,14 +11,10 @@ class APITests:
 
     namespace = None
 
-    def api_request(
-        self, url, method='GET', args=None, payload=None, token=None
-    ):
+    def api_request(self, url, method='GET', args=None, payload=None, token=None):
 
         if token:
-            self.client.credentials(
-                HTTP_AUTHORIZATION=f'{JWTOKEN_PREFIX} {token}'
-            )
+            self.client.credentials(HTTP_AUTHORIZATION=f'{JWTOKEN_PREFIX} {token}')
 
         if self.namespace:
             payload = {self.namespace: payload}
@@ -29,10 +25,13 @@ class APITests:
 
         if method == 'POST':
             res = self.client.post(url, payload, content_type=content_type)
+
         elif method == 'PATCH':
             res = self.client.patch(url, payload, content_type=content_type)
+
         elif method == 'DELETE':
             res = self.client.delete(url, payload, content_type=content_type)
+
         else:  # GET
             res = self.client.get(url, content_type=content_type)
 
@@ -47,5 +46,4 @@ class APITests:
         return get_user_model().objects.create_superuser(**sample)
 
     def setUp(self):
-
         self.client = APIClient()
