@@ -34,10 +34,11 @@ def _handle_generic_error(exc, context, response):
     else:
         data = {'errors': response.data}
 
-    rendered_data = GenericJSONRenderer().render(
-        data, renderer_context=context
-    )
+    #rendered_data = GenericJSONRenderer().render(
+    #    data, renderer_context=context
+    #)
 
-    response.data = rendered_data
+    #response.data = rendered_data
+    response.data = data
 
     return response

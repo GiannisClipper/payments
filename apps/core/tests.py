@@ -35,7 +35,8 @@ class APITests:
         else:  # GET
             res = self.client.get(url, content_type=content_type)
 
-        res.data = json.loads(res.data)
+        if isinstance(res.data, str):
+            res.data = json.loads(res.data)
 
         return res
 

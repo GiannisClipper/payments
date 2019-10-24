@@ -87,6 +87,8 @@ class OwnerDeleteRequestsFundsAPI(OwnerGetRequestsFundsAPI):
 
     METHOD = 'DELETE'
 
+    # To be executed the inherited tests
+
 
 class AdminRequestsFundsAPI(AdminPrivateFundsAPITests):
     '''Test admin's invalid requests to funds API.'''

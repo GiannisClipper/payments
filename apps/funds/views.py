@@ -9,13 +9,13 @@ from django.shortcuts import get_object_or_404
 from .models import Fund
 from users.permissions import IsAdminUserOrOwner
 from .serializers import FundSerializer
-from .renderers import FundJSONRenderer
+from .renderers import Fund2JSONRenderer
 
 
 class CreateFundAPIView(APIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = FundSerializer
-    # ### renderer_classes = (UserJSONRenderer,)
+    renderer_classes = (Fund2JSONRenderer,)
 
     def post(self, request):
         fund = request.data.get('fund', {})
@@ -30,22 +30,19 @@ class CreateFundAPIView(APIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
-        # ### return Response(serializer.data, status=status.HTTP_201_CREATED)
-        rendered_data = FundJSONRenderer().render(
-            serializer.data,
-            renderer_context={'request': request}
-        )
-        return Response(rendered_data, status=status.HTTP_201_CREATED)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class FundByIdAPIView(RetrieveUpdateDestroyAPIView):
     permission_classes = (IsAdminUserOrOwner,)
     serializer_class = FundSerializer
-    # ### renderer_classes = (UserJSONRenderer,)
+    renderer_classes = (Fund2JSONRenderer,)
 
     def get_object(self):
         obj = get_object_or_404(Fund, pk=self.kwargs['id'])
+
         self.check_object_permissions(self.request, obj.user)
+
         return obj
 
     def retrieve(self, request, *args, **kwargs):
@@ -56,13 +53,7 @@ class FundByIdAPIView(RetrieveUpdateDestroyAPIView):
             context={'request': request}  # required by url field
         )
 
-        # ### return Response(serializer.data, status=status.HTTP_200_OK)
-        rendered_data = FundJSONRenderer().render(
-            serializer.data,
-            renderer_context={'request': request}
-        )
-
-        return Response(rendered_data, status=status.HTTP_200_OK)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def update(self, request, *args, **kwargs):
         fund = self.get_object()
@@ -79,13 +70,7 @@ class FundByIdAPIView(RetrieveUpdateDestroyAPIView):
 
         serializer.save()
 
-        # ### return Response(serializer.data, status=status.HTTP_200_OK)
-        rendered_data = FundJSONRenderer().render(
-            serializer.data,
-            renderer_context={'request': request}
-        )
-
-        return Response(rendered_data, status=status.HTTP_200_OK)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def delete(self, request, *args, **kwargs):
         fund = self.get_object()
@@ -95,9 +80,4 @@ class FundByIdAPIView(RetrieveUpdateDestroyAPIView):
 
         serializer.delete(fund)
 
-        rendered_data = FundJSONRenderer().render(
-            {},
-            renderer_context={'request': request}
-        )
-
-        return Response(rendered_data, status=status.HTTP_200_OK)
+        return Response({}, status=status.HTTP_200_OK)
