@@ -43,3 +43,13 @@ class AdminPrivateFundsAPITests(PrivateFundsAPITests):
         user_, self.token = self.signin_as_admin(sample)
         self.user = get_user_model().objects.get(pk=user_['id'])
         self.user2 = get_user_model().objects.get(pk=2)
+
+
+class ListAPITests:
+    '''Test list requests to funds API.'''
+
+    def setUp(self):
+        for sample in self.samples['funds'][0]:
+            self.create_fund(self.user, sample)
+        for sample in self.samples['funds'][1]:
+            self.create_fund(self.user2, sample)

@@ -1,7 +1,5 @@
 from rest_framework.views import exception_handler
 
-from .renderers import GenericJSONRenderer
-
 
 def core_exception_handler(exc, context):
 
@@ -34,11 +32,6 @@ def _handle_generic_error(exc, context, response):
     else:
         data = {'errors': response.data}
 
-    #rendered_data = GenericJSONRenderer().render(
-    #    data, renderer_context=context
-    #)
-
-    #response.data = rendered_data
     response.data = data
 
     return response

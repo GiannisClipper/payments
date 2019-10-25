@@ -14,11 +14,15 @@ class FundsTests(TestCase):
             ],
 
             'funds': [
-                {'code': '1', 'name': 'CASH'},
-                {'code': '2', 'name': 'VISA'},
-                {'code': '3', 'name': 'MASTERCARD'},
-                {'code': '1', 'name': 'CASH'},
-                {'code': '2', 'name': 'PREPAID CARD'},
+                [
+                    {'code': '1', 'name': 'CASH'},
+                    {'code': '2', 'name': 'VISA'},
+                    {'code': '3', 'name': 'MASTERCARD'},
+                ],
+                [
+                    {'code': '1', 'name': 'CASH'},
+                    {'code': '2', 'name': 'PREPAID CARD'},
+                ]
             ],
         }
 

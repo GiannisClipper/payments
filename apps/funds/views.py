@@ -1,15 +1,16 @@
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
-from rest_framework.generics import RetrieveUpdateDestroyAPIView
+from rest_framework.generics import RetrieveUpdateDestroyAPIView, RetrieveAPIView
 from rest_framework.response import Response
 
+from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 
 from .models import Fund
 from users.permissions import IsAdminUserOrOwner
 from .serializers import FundSerializer
-from .renderers import FundJSONRenderer
+from .renderers import FundJSONRenderer, FundsJSONRenderer
 
 
 class CreateFundAPIView(APIView):
@@ -81,3 +82,45 @@ class FundByIdAPIView(RetrieveUpdateDestroyAPIView):
         serializer.delete(fund)
 
         return Response({}, status=status.HTTP_200_OK)
+
+
+class ListFundsAPIView(RetrieveAPIView):
+    permission_classes = (IsAdminUserOrOwner,)
+    serializer_class = FundSerializer
+    renderer_classes = (FundsJSONRenderer,)
+
+    def get_queryset(self, request):
+        user = None
+        user_id = request.query_params.get('user_id', None)
+
+        # Convert parameters
+        try: user_id = None if not user_id else int(user_id)
+        except Exception: user_id = -1
+
+        # Check permissions
+        if not request.user.is_staff:
+            if not user_id or user_id == request.user.pk:
+                user = request.user
+            self.check_object_permissions(request, user)
+
+        # Check if parameter exists
+        if not user and user_id:
+            user = get_object_or_404(get_user_model(), pk=user_id)
+
+        if user:
+            data = Fund.objects.filter(user=user)
+        else:
+            data = Fund.objects.all()
+
+        return data
+
+    def retrieve(self, request, *args, **kwargs):
+        queryset = self.get_queryset(request)
+
+        serializer = self.serializer_class(
+            queryset,
+            many=True,
+            context={'request': request}  # required by url field
+        )
+
+        return Response({'objects': serializer.data}, status=status.HTTP_200_OK)

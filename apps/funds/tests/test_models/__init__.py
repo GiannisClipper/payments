@@ -23,7 +23,7 @@ class FundModelBasicTests(FundModelTests):
     def test_create(self):
         user_ = self.samples['users'][0]
         user1 = get_user_model().objects.create_user(**user_)
-        fund_ = self.samples['funds'][0]
+        fund_ = self.samples['funds'][0][0]
         fund1 = self.create_fund(user1, fund_)
 
         self.assertEqual(fund1.user.id, fund_['user'].id)
@@ -33,10 +33,10 @@ class FundModelBasicTests(FundModelTests):
     def test_update(self):
         user_ = self.samples['users'][0]
         user1 = get_user_model().objects.create_user(**user_)
-        fund_ = self.samples['funds'][0]
+        fund_ = self.samples['funds'][0][0]
         fund1 = self.create_fund(user1, fund_)
 
-        fund_ = self.samples['funds'][1]
+        fund_ = self.samples['funds'][0][1]
         fund_['user'] = user1
         fund2 = fund1.update(**fund_)
 
@@ -45,7 +45,7 @@ class FundModelBasicTests(FundModelTests):
     def test_delete(self):
         user_ = self.samples['users'][0]
         user1 = get_user_model().objects.create_user(**user_)
-        fund_ = self.samples['funds'][0]
+        fund_ = self.samples['funds'][0][0]
         fund1 = self.create_fund(user1, fund_)
 
         fund1.delete()  # Built-in method
@@ -55,7 +55,7 @@ class FundModelBasicTests(FundModelTests):
     def test_str_representation(self):
         user_ = self.samples['users'][0]
         user1 = get_user_model().objects.create_user(**user_)
-        fund_ = self.samples['funds'][0]
+        fund_ = self.samples['funds'][0][0]
         fund1 = self.create_fund(user1, fund_)
 
         self.assertEqual(str(fund1), fund_['name'])
@@ -65,7 +65,7 @@ class FundModelValidationOnCreateTests(FundModelTests):
 
     def test_required_errors(self):
         errors = ''
-        fund_ = self.samples['funds'][0]
+        fund_ = self.samples['funds'][0][0]
         fund_.pop('user', None)
         fund_.pop('code', None)
         fund_.pop('name', None)
@@ -81,7 +81,7 @@ class FundModelValidationOnCreateTests(FundModelTests):
 
     def test_required_errors_by_passing_empty_values(self):
         errors = ''
-        fund_ = self.samples['funds'][0]
+        fund_ = self.samples['funds'][0][0]
         fund_['user'] = None
         fund_['code'] = '        '
         fund_['name'] = '        '
@@ -99,7 +99,7 @@ class FundModelValidationOnCreateTests(FundModelTests):
         errors = ''
         user_ = self.samples['users'][0]
         user1 = get_user_model().objects.create_user(**user_)
-        fund_ = self.samples['funds'][0]
+        fund_ = self.samples['funds'][0][0]
         self.create_fund(user1, fund_)
 
         try:
@@ -113,7 +113,7 @@ class FundModelValidationOnCreateTests(FundModelTests):
     def test_same_values_to_other_users(self):
         user_ = self.samples['users'][0]
         user1 = get_user_model().objects.create_user(**user_)
-        fund_ = self.samples['funds'][0]
+        fund_ = self.samples['funds'][0][0]
         fund1 = self.create_fund(user1, fund_)
 
         user_ = self.samples['users'][1]
@@ -131,7 +131,7 @@ class FundModelValidationOnUpdateTests(FundModelTests):
         errors = ''
         user_ = self.samples['users'][0]
         user1 = get_user_model().objects.create_user(**user_)
-        fund_ = self.samples['funds'][0]
+        fund_ = self.samples['funds'][0][0]
         fund1 = self.create_fund(user1, fund_)
         fund_['user'] = None
         fund_['code'] = '        '
@@ -150,11 +150,11 @@ class FundModelValidationOnUpdateTests(FundModelTests):
         errors = ''
         user_ = self.samples['users'][0]
         user1 = get_user_model().objects.create_user(**user_)
-        fund_ = self.samples['funds'][0]
+        fund_ = self.samples['funds'][0][0]
         self.create_fund(user1, fund_)
-        fund_ = self.samples['funds'][1]
+        fund_ = self.samples['funds'][0][1]
         fund2 = self.create_fund(user1, fund_)
-        fund_ = self.samples['funds'][0]
+        fund_ = self.samples['funds'][0][0]
 
         try:
             fund2.update(**fund_)
@@ -167,9 +167,9 @@ class FundModelValidationOnUpdateTests(FundModelTests):
     def test_same_values_to_other_users(self):
         user_ = self.samples['users'][0]
         user1 = get_user_model().objects.create_user(**user_)
-        fund_ = self.samples['funds'][0]
+        fund_ = self.samples['funds'][0][0]
         fund1 = self.create_fund(user1, fund_)
-        fund_ = self.samples['funds'][1]
+        fund_ = self.samples['funds'][0][1]
         fund2 = self.create_fund(user1, fund_)
 
         user_ = self.samples['users'][1]
