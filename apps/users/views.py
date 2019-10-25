@@ -2,9 +2,7 @@ from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.generics import (
-    RetrieveUpdateDestroyAPIView, RetrieveAPIView,
-)
+from rest_framework.generics import RetrieveUpdateDestroyAPIView, RetrieveAPIView
 
 from django.shortcuts import get_object_or_404
 
@@ -17,7 +15,7 @@ from .renderers import UserJSONRenderer, UsersJSONRenderer
 class SignupAPIView(APIView):
     permission_classes = (AllowAny,)
     serializer_class = SignupSerializer
-    # ### renderer_classes = (UserJSONRenderer,)
+    renderer_classes = (UserJSONRenderer,)
 
     def post(self, request):
         user = request.data.get('user', {})
@@ -26,15 +24,13 @@ class SignupAPIView(APIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
-        # ### return Response(serializer.data, status=status.HTTP_201_CREATED)
-        rendered_data = UserJSONRenderer().render(serializer.data)
-        return Response(rendered_data, status=status.HTTP_201_CREATED)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class SigninAPIView(APIView):
     permission_classes = (AllowAny,)
     serializer_class = SigninSerializer
-    # ### renderer_classes = (UserJSONRenderer,)
+    renderer_classes = (UserJSONRenderer,)
 
     def post(self, request):
         user = request.data.get('user', {})
@@ -42,15 +38,13 @@ class SigninAPIView(APIView):
         serializer = self.serializer_class(data=user)
         serializer.is_valid(raise_exception=True)
 
-        # ### return Response(serializer.data, status=status.HTTP_200_OK)
-        rendered_data = UserJSONRenderer().render(serializer.data)
-        return Response(rendered_data, status=status.HTTP_200_OK)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class CurrentUserAPIView(RetrieveUpdateDestroyAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = UserSerializer
-    # ### renderer_classes = (UserJSONRenderer,)
+    renderer_classes = (UserJSONRenderer,)
 
     def get_object(self):
         return self.request.user
@@ -63,13 +57,7 @@ class CurrentUserAPIView(RetrieveUpdateDestroyAPIView):
             context={'request': request}  # required by url field
         )
 
-        # ### return Response(serializer.data, status=status.HTTP_200_OK)
-        rendered_data = UserJSONRenderer().render(
-            serializer.data,
-            renderer_context={'request': request}
-        )
-
-        return Response(rendered_data, status=status.HTTP_200_OK)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def update(self, request, *args, **kwargs):
         user = self.get_object()
@@ -86,13 +74,7 @@ class CurrentUserAPIView(RetrieveUpdateDestroyAPIView):
 
         serializer.save()
 
-        # ### return Response(serializer.data, status=status.HTTP_200_OK)
-        rendered_data = UserJSONRenderer().render(
-            serializer.data,
-            renderer_context={'request': request}
-        )
-
-        return Response(rendered_data, status=status.HTTP_200_OK)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def delete(self, request, *args, **kwargs):
         user = self.get_object()
@@ -102,18 +84,11 @@ class CurrentUserAPIView(RetrieveUpdateDestroyAPIView):
 
         serializer.delete(user)
 
-        rendered_data = UserJSONRenderer().render(
-            {},
-            renderer_context={'request': request}
-        )
-
-        return Response(rendered_data, status=status.HTTP_200_OK)
+        return Response({}, status=status.HTTP_200_OK)
 
 
 class UserByIdAPIView(CurrentUserAPIView):
     permission_classes = (IsAdminUserOrOwner,)
-    serializer_class = UserSerializer
-    # ### renderer_classes = (UserJSONRenderer,)
 
     def get_object(self):
         obj = get_object_or_404(User, pk=self.kwargs['id'])
@@ -124,7 +99,7 @@ class UserByIdAPIView(CurrentUserAPIView):
 class AllUsersAPIView(RetrieveAPIView):
     permission_classes = (IsAdminUser,)
     serializer_class = UserSerializer
-    # ### renderer_classes = (UsersJSONRenderer,)
+    renderer_classes = (UsersJSONRenderer,)
 
     def get_queryset(self):
         return User.objects.all()
@@ -138,13 +113,7 @@ class AllUsersAPIView(RetrieveAPIView):
             context={'request': request}  # required by url field
         )
 
-        # ### return Response(serializer.data, status=status.HTTP_200_OK)
-        rendered_data = UsersJSONRenderer().render(
-            serializer.data,
-            renderer_context={'request': request}
-        )
-
-        return Response(rendered_data, status=status.HTTP_200_OK)
+        return Response({'objects': serializer.data}, status=status.HTTP_200_OK)
 
 
 class AdminUsersAPIView(AllUsersAPIView):

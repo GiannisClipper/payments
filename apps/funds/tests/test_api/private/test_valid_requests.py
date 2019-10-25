@@ -5,10 +5,10 @@ from funds.tests.test_api import ROOT_URL, BY_ID_1_URL
 from . import OwnerPrivateFundsAPITests, AdminPrivateFundsAPITests
 
 
-class OwnerRequestsFundsAPI(OwnerPrivateFundsAPITests):
+class OwnerRequest(OwnerPrivateFundsAPITests):
     '''Test owner's valid requests to funds API.'''
 
-    def test_create(self):
+    def test_post(self):
         sample = self.samples['funds'][0]
         res = self.api_request(ROOT_URL, 'POST', payload=sample, token=self.token)
 
@@ -20,7 +20,7 @@ class OwnerRequestsFundsAPI(OwnerPrivateFundsAPITests):
         self.assertIn(f"/funds/{res.data['fund']['id']}/", res.data['fund']['url'])
         self.assertEqual(res.data['token'], self.token)
 
-    def test_retrieve(self):
+    def test_get(self):
         sample = self.samples['funds'][0]
         self.create_fund(self.user, sample)
         res = self.api_request(BY_ID_1_URL, 'GET', token=self.token)
@@ -33,7 +33,7 @@ class OwnerRequestsFundsAPI(OwnerPrivateFundsAPITests):
         self.assertIn(f"/funds/{res.data['fund']['id']}/", res.data['fund']['url'])
         self.assertEqual(res.data['token'], self.token)
 
-    def test_update(self):
+    def test_patch(self):
         sample = self.samples['funds'][0]
         self.create_fund(self.user, sample)
         sample = self.samples['funds'][1]
@@ -56,10 +56,10 @@ class OwnerRequestsFundsAPI(OwnerPrivateFundsAPITests):
         self.assertEqual(res.data['token'], self.token)
 
 
-class AdminRequestsFundsAPI(AdminPrivateFundsAPITests):
+class AdminRequest(AdminPrivateFundsAPITests):
     '''Test admin's valid requests to funds API.'''
 
-    def test_create_same_values_to_other_user(self):
+    def test_post_same_values_to_other_user(self):
         sample = self.samples['funds'][0]
         self.create_fund(self.user, sample)  # admin who has signed in
         sample['user'] = self.user2.pk  # same values to other user
@@ -73,7 +73,7 @@ class AdminRequestsFundsAPI(AdminPrivateFundsAPITests):
         self.assertIn(f"/funds/{res.data['fund']['id']}/", res.data['fund']['url'])
         self.assertEqual(res.data['token'], self.token)
 
-    def test_retrieve(self):
+    def test_get(self):
         sample = self.samples['funds'][0]
         self.create_fund(self.user2, sample)  # other user
         res = self.api_request(BY_ID_1_URL, 'GET', token=self.token)
@@ -86,7 +86,7 @@ class AdminRequestsFundsAPI(AdminPrivateFundsAPITests):
         self.assertIn(f"/funds/{res.data['fund']['id']}/", res.data['fund']['url'])
         self.assertEqual(res.data['token'], self.token)
 
-    def test_update_values_to_other_user(self):
+    def test_patch_values_to_other_user(self):
         sample = self.samples['funds'][0]
         self.create_fund(self.user, sample)  # admin who has signed in
         sample['user'] = self.user2.pk  # other user

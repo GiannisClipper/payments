@@ -5,7 +5,7 @@ from funds.tests.test_api import ROOT_URL, BY_ID_1_URL
 from . import OwnerPrivateFundsAPITests, AdminPrivateFundsAPITests
 
 
-class OwnerGetRequestsFundsAPI(OwnerPrivateFundsAPITests):
+class OwnerGet(OwnerPrivateFundsAPITests):
     '''Test owner's invalid GET requests to funds API.'''
 
     METHOD = 'GET'
@@ -27,7 +27,7 @@ class OwnerGetRequestsFundsAPI(OwnerPrivateFundsAPITests):
         self.assertEqual(res.data['token'], self.token)
 
 
-class OwnerPostRequestsFundsAPI(OwnerPrivateFundsAPITests):
+class OwnerPost(OwnerPrivateFundsAPITests):
     '''Test owner's invalid POST requests to funds API.'''
 
     METHOD = 'POST'
@@ -52,7 +52,7 @@ class OwnerPostRequestsFundsAPI(OwnerPrivateFundsAPITests):
         self.assertEqual(res.data['token'], self.token)
 
 
-class OwnerPatchRequestsFundsAPI(OwnerGetRequestsFundsAPI):
+class OwnerPatch(OwnerGet):
     '''Test owner's invalid PATCH requests to funds API.'''
 
     METHOD = 'PATCH'
@@ -82,7 +82,7 @@ class OwnerPatchRequestsFundsAPI(OwnerGetRequestsFundsAPI):
         self.assertEqual(res.data['token'], self.token)
 
 
-class OwnerDeleteRequestsFundsAPI(OwnerGetRequestsFundsAPI):
+class OwnerDelete(OwnerGet):
     '''Test owner's invalid DELETE requests to funds API.'''
 
     METHOD = 'DELETE'
@@ -90,7 +90,7 @@ class OwnerDeleteRequestsFundsAPI(OwnerGetRequestsFundsAPI):
     # To be executed the inherited tests
 
 
-class AdminRequestsFundsAPI(AdminPrivateFundsAPITests):
+class AdminRequest(AdminPrivateFundsAPITests):
     '''Test admin's invalid requests to funds API.'''
 
     def test_post_when_values_are_missing(self):

@@ -9,13 +9,13 @@ from django.shortcuts import get_object_or_404
 from .models import Fund
 from users.permissions import IsAdminUserOrOwner
 from .serializers import FundSerializer
-from .renderers import Fund2JSONRenderer
+from .renderers import FundJSONRenderer
 
 
 class CreateFundAPIView(APIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = FundSerializer
-    renderer_classes = (Fund2JSONRenderer,)
+    renderer_classes = (FundJSONRenderer,)
 
     def post(self, request):
         fund = request.data.get('fund', {})
@@ -36,7 +36,7 @@ class CreateFundAPIView(APIView):
 class FundByIdAPIView(RetrieveUpdateDestroyAPIView):
     permission_classes = (IsAdminUserOrOwner,)
     serializer_class = FundSerializer
-    renderer_classes = (Fund2JSONRenderer,)
+    renderer_classes = (FundJSONRenderer,)
 
     def get_object(self):
         obj = get_object_or_404(Fund, pk=self.kwargs['id'])

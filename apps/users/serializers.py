@@ -130,10 +130,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = User
-        fields = (
-            'id', 'username', 'password', 'email', 'is_admin', 'is_active',
-            'url'
-        )
+        fields = ('id', 'username', 'password', 'email', 'is_admin', 'is_active', 'url')
 
         extra_kwargs = error_messages
 
