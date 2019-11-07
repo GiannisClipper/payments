@@ -1,6 +1,22 @@
 from django.test import TestCase
 
+import copy
+
 from funds.models import Fund
+
+from users.tests import SAMPLES as USERS_SAMPLES
+
+SAMPLES = [
+    [
+        {'code': '1', 'name': 'CASH'},
+        {'code': '2', 'name': 'VISA'},
+        {'code': '3', 'name': 'MASTERCARD'},
+    ],
+    [
+        {'code': '1', 'name': 'CASH'},
+        {'code': '2', 'name': 'PREPAID CARD'},
+    ],
+]
 
 
 class FundsTests(TestCase):
@@ -8,25 +24,12 @@ class FundsTests(TestCase):
     def setUp(self):
 
         self.samples = {
-            'users': [
-                {'username': 'user1', 'password': 'pass123', 'email': 'user1@testemail.org'},  # noqa: E501
-                {'username': 'user2', 'password': 'pass234', 'email': 'user2@testemail.org'},  # noqa: E501
-            ],
-
-            'funds': [
-                [
-                    {'code': '1', 'name': 'CASH'},
-                    {'code': '2', 'name': 'VISA'},
-                    {'code': '3', 'name': 'MASTERCARD'},
-                ],
-                [
-                    {'code': '1', 'name': 'CASH'},
-                    {'code': '2', 'name': 'PREPAID CARD'},
-                ]
-            ],
+            'users': copy.deepcopy(USERS_SAMPLES),
+            'funds': copy.deepcopy(SAMPLES),
         }
 
-    def create_fund(self, user, fund):
+    @staticmethod
+    def create_fund(user, fund):
 
         fund['user'] = user
 

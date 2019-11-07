@@ -94,8 +94,8 @@ class ListFundsAPIView(RetrieveAPIView):
         user_id = request.query_params.get('user_id', None)
 
         # Convert parameters
-        try: user_id = None if not user_id else int(user_id)
-        except Exception: user_id = -1
+        try: user_id = None if not user_id else int(user_id)  # noqa: E701
+        except Exception: user_id = -1  # noqa: E701
 
         # Check permissions
         if not request.user.is_staff:

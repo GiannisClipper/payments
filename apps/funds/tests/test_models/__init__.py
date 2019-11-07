@@ -1,9 +1,9 @@
-from django.contrib.auth import get_user_model
+from unittest import skip  # noqa: F401
 from django.core.exceptions import ValidationError
 
-from unittest import skip  # noqa: F401
-
+from django.contrib.auth import get_user_model
 from funds.models import Fund
+
 from funds.tests import FundsTests
 
 
