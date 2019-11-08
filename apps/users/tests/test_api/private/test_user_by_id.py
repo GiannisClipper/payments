@@ -18,7 +18,7 @@ from users.constants import (
 
 BY_ID_1_URL = reverse('users:by-id', kwargs={'id': 1})
 BY_ID_2_URL = reverse('users:by-id', kwargs={'id': 2})
-BY_ID_3_URL = reverse('users:by-id', kwargs={'id': 3})
+BY_ID_0_URL = reverse('users:by-id', kwargs={'id': 0})
 
 
 class OwnerAccessUserByIdAPITests(CurrentUserAPITests):
@@ -31,38 +31,33 @@ class AdminAccessUserByIdAPITests(PrivateUsersAPITests):
     '''Test user-by-id API by admin.'''
 
     def test_valid_retrieve(self):
-        payload = self.samples[0]
-        user, token = self.signin_as_admin(payload)
+        sample = self.samples['users'][0]
+        user, token = self.signin_as_admin(sample)
         res = self.api_request(BY_ID_2_URL, 'GET', token=token)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertNotEqual(user['username'], res.data['user']['username'])
-        self.assertIn(
-            f"/users/{res.data['user']['id']}/", res.data['user']['url']
-        )
+        self.assertIn(f"/users/{res.data['user']['id']}/", res.data['user']['url'])
         self.assertEqual(token, res.data['token'])
 
     def test_valid_update(self):
-        payload = self.samples[0]
-        user, token = self.signin_as_admin(payload)
-        payload = self.samples[2]
-        res = self.api_request(
-            BY_ID_2_URL, 'PATCH', payload=payload, token=token
-        )
+        sample = self.samples['users'][0]
+        user, token = self.signin_as_admin(sample)
+        sample['username'] += 'blabla'
+        sample['email'] += 'blabla'
+        res = self.api_request(BY_ID_2_URL, 'PATCH', payload=sample, token=token)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertNotEqual(user['id'], res.data['user']['id'])
-        self.assertEqual(payload['username'], res.data['user']['username'])
-        self.assertEqual(payload['email'], res.data['user']['email'])
+        self.assertEqual(sample['username'], res.data['user']['username'])
+        self.assertEqual(sample['email'], res.data['user']['email'])
         self.assertEqual(token, res.data['token'])
 
     def test_invalid_update_when_values_exists_or_invalid(self):
-        payload = self.samples[0]
-        user, token = self.signin_as_admin(payload)
-        payload['password'] = '*'
-        res = self.api_request(
-            BY_ID_2_URL, 'PATCH', payload=payload, token=token
-        )
+        sample = self.samples['users'][0]
+        user, token = self.signin_as_admin(sample)
+        sample['password'] = '*'
+        res = self.api_request(BY_ID_2_URL, 'PATCH', payload=sample, token=token)
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('errors', res.data)
@@ -72,14 +67,12 @@ class AdminAccessUserByIdAPITests(PrivateUsersAPITests):
         self.assertEqual(token, res.data['token'])
 
     def test_invalid_update_when_values_are_empty(self):
-        payload = self.samples[0]
-        user, token = self.signin_as_admin(payload)
-        payload['username'] = ''
-        payload['password'] = ''
-        payload['email'] = None
-        res = self.api_request(
-            BY_ID_2_URL, 'PATCH', payload=payload, token=token
-        )
+        sample = self.samples['users'][0]
+        user, token = self.signin_as_admin(sample)
+        sample['username'] = ''
+        sample['password'] = ''
+        sample['email'] = None
+        res = self.api_request(BY_ID_2_URL, 'PATCH', payload=sample, token=token)
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('errors', res.data)
@@ -89,23 +82,19 @@ class AdminAccessUserByIdAPITests(PrivateUsersAPITests):
         self.assertEqual(token, res.data['token'])
 
     def test_valid_delete(self):
-        payload = self.samples[0]
-        user, token = self.signin_as_admin(payload)
-        res = self.api_request(
-            BY_ID_2_URL, 'DELETE', payload=payload, token=token
-        )
+        sample = self.samples['users'][0]
+        user, token = self.signin_as_admin(sample)
+        res = self.api_request(BY_ID_2_URL, 'DELETE', payload=sample, token=token)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual({}, res.data['user'])
         self.assertEqual(token, res.data['token'])
 
     def test_invalid_delete_when_not_authenticate_well(self):
-        payload = self.samples[0]
-        user, token = self.signin_as_admin(payload)
-        payload['password'] = 'blabla'
-        res = self.api_request(
-            BY_ID_2_URL, 'DELETE', payload=payload, token=token
-        )
+        sample = self.samples['users'][0]
+        user, token = self.signin_as_admin(sample)
+        sample['password'] = 'blabla'
+        res = self.api_request(BY_ID_2_URL, 'DELETE', payload=sample, token=token)
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('errors', res.data)
@@ -119,8 +108,8 @@ class PostUserByIdWhenNotAccessible(PrivateUsersAPITests):
     METHOD = 'Post'
 
     def test_invalid_request_without_permission(self):
-        payload = self.samples[0]
-        user, token = self.signin(payload)
+        sample = self.samples['users'][0]
+        user, token = self.signin_as_user(sample)
         res = self.api_request(BY_ID_2_URL, self.METHOD, token=token)
 
         self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
@@ -128,9 +117,9 @@ class PostUserByIdWhenNotAccessible(PrivateUsersAPITests):
         self.assertEqual(token, res.data['token'])
 
     def test_invalid_request_when_id_not_exists(self):
-        payload = self.samples[0]
-        user, token = self.signin_as_admin(payload)
-        res = self.api_request(BY_ID_3_URL, self.METHOD, token=token)
+        sample = self.samples['users'][0]
+        user, token = self.signin_as_admin(sample)
+        res = self.api_request(BY_ID_0_URL, self.METHOD, token=token)
 
         self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
         self.assertIn('errors', res.data)

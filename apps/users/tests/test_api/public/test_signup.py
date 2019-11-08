@@ -22,17 +22,17 @@ class SignupAPITests(PublicUsersAPITests):
     '''Test users signup API requests.'''
 
     def test_valid_signup(self):
-        payload = self.samples[0]
-        res = self.api_request(SIGNUP_URL, 'POST', payload=payload)
+        sample = self.samples['users'][0]
+        res = self.api_request(SIGNUP_URL, 'POST', payload=sample)
 
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         user = get_user_model().objects.get(pk=res.data['user']['id'])
-        self.assertTrue(user.check_password(self.samples[0]['password']))
+        self.assertTrue(user.check_password(sample['password']))
         self.assertNotIn('password', res.data)
 
     def test_invalid_signup_when_values_are_empty_or_missing(self):
-        payload = {'username': '', 'password': ''}
-        res = self.api_request(SIGNUP_URL, 'POST', payload=payload)
+        sample = {'username': '', 'password': ''}
+        res = self.api_request(SIGNUP_URL, 'POST', payload=sample)
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('errors', res.data)
@@ -41,11 +41,11 @@ class SignupAPITests(PublicUsersAPITests):
         self.assertIn(EMAIL_REQUIRED, res.data['errors']['email'])
 
     def test_invalid_signup_when_values_exists_or_invalid(self):
-        self.create_user(**self.samples[0])
-        self.create_user(**self.samples[1])
-        payload = self.samples[0]
-        payload['password'] = '*'
-        res = self.api_request(SIGNUP_URL, 'POST', payload=payload)
+        for user in self.samples['users']:
+            self.create_user(**user)
+        sample = self.samples['users'][0]
+        sample['password'] = '*'
+        res = self.api_request(SIGNUP_URL, 'POST', payload=sample)
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('errors', res.data)

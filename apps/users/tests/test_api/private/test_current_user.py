@@ -23,36 +23,33 @@ class CurrentUserAPITests(PrivateUsersAPITests):
     URL = CURRENT_URL
 
     def test_retrieve(self):
-        payload = self.samples[0]
-        user, token = self.signin(payload)
-        res = self.api_request(self.URL, 'GET', payload, token=token)
+        sample = self.samples['users'][0]
+        user, token = self.signin_as_user(sample)
+        res = self.api_request(self.URL, 'GET', payload=sample, token=token)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(user['username'], res.data['user']['username'])
         self.assertEqual(token, res.data['token'])
 
     def test_valid_update(self):
-        payload = self.samples[0]
-        user, token = self.signin(payload)
-        payload = self.samples[2]
-        res = self.api_request(
-            self.URL, 'PATCH', payload=payload, token=token
-        )
+        sample = self.samples['users'][0]
+        user, token = self.signin_as_user(sample)
+        sample['username'] += 'blabla'
+        sample['email'] += 'blabla'
+        res = self.api_request(self.URL, 'PATCH', payload=sample, token=token)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(user['id'], res.data['user']['id'])
-        self.assertEqual(payload['username'], res.data['user']['username'])
-        self.assertEqual(payload['email'], res.data['user']['email'])
+        self.assertEqual(sample['username'], res.data['user']['username'])
+        self.assertEqual(sample['email'], res.data['user']['email'])
         self.assertEqual(token, res.data['token'])
 
     def test_invalid_update_when_values_exists_or_invalid(self):
-        payload = self.samples[0]
-        user, token = self.signin(payload)
-        payload = self.samples[1]
-        payload['password'] = '*'
-        res = self.api_request(
-            self.URL, 'PATCH', payload=payload, token=token
-        )
+        sample = self.samples['users'][0]
+        user, token = self.signin_as_user(sample)
+        sample = self.samples['users'][1]
+        sample['password'] = '*'
+        res = self.api_request(self.URL, 'PATCH', payload=sample, token=token)
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('errors', res.data)
@@ -62,14 +59,12 @@ class CurrentUserAPITests(PrivateUsersAPITests):
         self.assertEqual(token, res.data['token'])
 
     def test_invalid_update_when_values_are_empty(self):
-        payload = self.samples[0]
-        user, token = self.signin(payload)
-        payload['username'] = ''
-        payload['password'] = ''
-        payload['email'] = None
-        res = self.api_request(
-            self.URL, 'PATCH', payload=payload, token=token
-        )
+        sample = self.samples['users'][0]
+        user, token = self.signin_as_user(sample)
+        sample['username'] = ''
+        sample['password'] = ''
+        sample['email'] = None
+        res = self.api_request(self.URL, 'PATCH', payload=sample, token=token)
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('errors', res.data)
@@ -79,23 +74,19 @@ class CurrentUserAPITests(PrivateUsersAPITests):
         self.assertEqual(token, res.data['token'])
 
     def test_valid_delete(self):
-        payload = self.samples[0]
-        user, token = self.signin(payload)
-        res = self.api_request(
-            self.URL, 'DELETE', payload=payload, token=token
-        )
+        sample = self.samples['users'][0]
+        user, token = self.signin_as_user(sample)
+        res = self.api_request(self.URL, 'DELETE', payload=sample, token=token)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual({}, res.data['user'])
         self.assertEqual(token, res.data['token'])
 
     def test_invalid_delete_when_not_authenticate_well(self):
-        payload = self.samples[0]
-        user, token = self.signin(payload)
-        payload['password'] = 'blabla'
-        res = self.api_request(
-            self.URL, 'DELETE', payload=payload, token=token
-        )
+        sample = self.samples['users'][0]
+        user, token = self.signin_as_user(sample)
+        sample['password'] = 'blabla'
+        res = self.api_request(self.URL, 'DELETE', payload=sample, token=token)
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('errors', res.data)

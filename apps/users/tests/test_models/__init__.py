@@ -38,54 +38,61 @@ class UserModelBasicTests(UserModelTests):
         self.assertTrue('updated_at' in fields)
 
     def test_create_user(self):
-        user = User.objects.create_user(**self.samples[0])
+        sample = self.samples['users'][0]
+        user = self.create_user(**sample)
 
-        self.assertEqual(user.username, self.samples[0]['username'])
-        self.assertTrue(user.check_password(self.samples[0]['password']))
-        self.assertEqual(user.email, self.samples[0]['email'])
+        self.assertEqual(user.username, sample['username'])
+        self.assertTrue(user.check_password(sample['password']))
+        self.assertEqual(user.email, sample['email'])
         self.assertFalse(user.is_superuser)
         self.assertFalse(user.is_staff)
 
     def test_create_superuser(self):
-        user = User.objects.create_superuser(**self.samples[0])
+        sample = self.samples['users'][0]
+        user = self.create_admin(**sample)
 
-        self.assertEqual(user.username, self.samples[0]['username'])
-        self.assertTrue(user.check_password(self.samples[0]['password']))
-        self.assertEqual(user.email, self.samples[0]['email'])
+        self.assertEqual(user.username, sample['username'])
+        self.assertTrue(user.check_password(sample['password']))
+        self.assertEqual(user.email, sample['email'])
         self.assertTrue(user.is_superuser)
         self.assertTrue(user.is_staff)
 
     def test_update(self):
-        init_user = User.objects.create_superuser(**self.samples[0])
-        user = init_user.update(**self.samples[1])
+        sample = self.samples['users'][0]
+        init_user = self.create_admin(**sample)
+        sample = self.samples['users'][1]
+        user = init_user.update(**sample)
 
         self.assertEqual(user.pk, init_user.pk)
-        self.assertEqual(user.username, self.samples[1]['username'])
-        self.assertTrue(user.check_password(self.samples[1]['password']))
-        self.assertEqual(user.email, self.samples[1]['email'])
+        self.assertEqual(user.username, sample['username'])
+        self.assertTrue(user.check_password(sample['password']))
+        self.assertEqual(user.email, sample['email'])
 
     def test_delete(self):
-        user = User.objects.create_superuser(**self.samples[1])
+        sample = self.samples['users'][1]
+        user = self.create_admin(**sample)
         user.delete()  # Built-in method
 
         self.assertEqual(user.pk, None)
 
     def test_str_representation(self):
-        user = User.objects.create_user(**self.samples[0])
+        sample = self.samples['users'][0]
+        user = self.create_user(**sample)
 
-        self.assertEqual(str(user), self.samples[0]['username'])
+        self.assertEqual(str(user), sample['username'])
 
 
 class UserModelValidationOnCreateTests(UserModelTests):
 
     def test_required_errors(self):
         errors = ''
-        del self.samples[0]['username']
-        del self.samples[0]['password']
-        del self.samples[0]['email']
+        sample = self.samples['users'][0]
+        del sample['username']
+        del sample['password']
+        del sample['email']
 
         try:
-            User.objects.create_user(**self.samples[0])
+            self.create_user(**sample)
         except ValidationError as err:
             errors = str(err)
 
@@ -95,12 +102,13 @@ class UserModelValidationOnCreateTests(UserModelTests):
 
     def test_required_errors_by_passing_empty_values(self):
         errors = ''
-        self.samples[0]['username'] = '        '
-        self.samples[0]['password'] = '        '
-        self.samples[0]['email'] = None
+        sample = self.samples['users'][0]
+        sample['username'] = '        '
+        sample['password'] = '        '
+        sample['email'] = None
 
         try:
-            User.objects.create_user(**self.samples[0])
+            self.create_user(**sample)
         except ValidationError as err:
             errors = str(err)
 
@@ -110,10 +118,11 @@ class UserModelValidationOnCreateTests(UserModelTests):
 
     def test_unique_errors(self):
         errors = ''
-        User.objects.create_user(**self.samples[0])
+        sample = self.samples['users'][0]
+        self.create_user(**sample)
 
         try:
-            User.objects.create_user(**self.samples[0])
+            self.create_user(**sample)
         except Exception as err:
             errors = str(err)
 
@@ -121,23 +130,25 @@ class UserModelValidationOnCreateTests(UserModelTests):
         self.assertIn(EMAIL_EXISTS, errors)
 
     def test_password_min_length(self):
-        self.samples[0]['password'] = '*'
+        sample = self.samples['users'][0]
+        sample['password'] = '*'
 
         try:
-            User.objects.create_user(**self.samples[0])
+            self.create_user(**sample)
         except Exception as err:
             errors = str(err)
 
         self.assertIn(PASSWORD_TOO_SHORT, errors)
 
     def test_email_normalization(self):
-        self.samples[0]['email'] = self.samples[0]['email'].upper()
-        user = User.objects.create_user(**self.samples[0])
+        sample = self.samples['users'][0]
+        sample['email'] = sample['email'].upper()
+        user = self.create_user(**sample)
 
         self.assertEqual(
             user.email,
-            self.samples[0]['email'].split('@')[0] + '@' +
-            self.samples[0]['email'].split('@')[1].lower()
+            sample['email'].split('@')[0] + '@' +
+            sample['email'].split('@')[1].lower()
         )
 
 
@@ -145,13 +156,14 @@ class UserModelValidationOnUpdateTests(UserModelTests):
 
     def test_required_errors_by_passing_empty_values(self):
         errors = ''
-        user = User.objects.create_user(**self.samples[0])
-        self.samples[0]['username'] = '        '
-        self.samples[0]['password'] = '        '
-        self.samples[0]['email'] = None
+        sample = self.samples['users'][0]
+        user = self.create_user(**sample)
+        sample['username'] = '        '
+        sample['password'] = '        '
+        sample['email'] = None
 
         try:
-            user.update(**self.samples[0])
+            user.update(**sample)
         except ValidationError as err:
             errors = str(err)
 
@@ -161,11 +173,13 @@ class UserModelValidationOnUpdateTests(UserModelTests):
 
     def test_unique_errors(self):
         errors = ''
-        User.objects.create_user(**self.samples[0])
-        user = User.objects.create_user(**self.samples[1])
+        sample1 = self.samples['users'][0]
+        self.create_user(**sample1)
+        sample2 = self.samples['users'][1]
+        user = self.create_user(**sample2)
 
         try:
-            user.update(**self.samples[0])
+            user.update(**sample1)
         except Exception as err:
             errors = str(err)
 

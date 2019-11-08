@@ -17,18 +17,18 @@ class SigninAPITests(PublicUsersAPITests):
     '''Test users signin API requests.'''
 
     def test_valid_signin(self):
-        self.create_user(**self.samples[0])
-        self.create_user(**self.samples[1])
-        payload = self.samples[1]
-        res = self.api_request(SIGNIN_URL, 'POST', payload=payload)
+        for user in self.samples['users']:
+            self.create_user(**user)
+        sample = self.samples['users'][1]
+        res = self.api_request(SIGNIN_URL, 'POST', payload=sample)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertNotIn('password', res.data['user'])
         self.assertIn('token', res.data)
 
     def test_invalid_signin_when_values_are_empty(self):
-        payload = {'username': '', 'password': ''}
-        res = self.api_request(SIGNIN_URL, 'POST', payload=payload)
+        sample = {'username': '', 'password': ''}
+        res = self.api_request(SIGNIN_URL, 'POST', payload=sample)
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('errors', res.data)
@@ -36,10 +36,10 @@ class SigninAPITests(PublicUsersAPITests):
         self.assertIn(PASSWORD_REQUIRED, res.data['errors']['password'])
 
     def test_invalid_signin_when_credentials_not_match(self):
-        self.create_user(**self.samples[0])
-        self.create_user(**self.samples[1])
-        payload = {'username': '*', 'password': '*'}
-        res = self.api_request(SIGNIN_URL, 'POST', payload=payload)
+        for user in self.samples['users']:
+            self.create_user(**user)
+        sample = {'username': '*', 'password': '*'}
+        res = self.api_request(SIGNIN_URL, 'POST', payload=sample)
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('errors', res.data)

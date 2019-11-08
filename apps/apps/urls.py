@@ -37,6 +37,7 @@ urlpatterns = [
     path('', root, name='root'),
     path('users/', include('users.urls', namespace='users')),
     path('funds/', include('funds.urls', namespace='funds')),
+    path('genres/', include('genres.urls', namespace='genres')),
 
     # path('debug/', debug),
 ]

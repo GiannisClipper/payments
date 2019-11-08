@@ -1,5 +1,5 @@
 from users.tests import UsersTests
-from core.tests import APITests
+from core.tests.test_api import APITests
 
 
 class UsersAPITests(UsersTests, APITests):

@@ -10,18 +10,9 @@ class AllUsersListAPITests(PrivateUsersAPITests):
 
     LIST_URL = reverse('users:all-list')
 
-    def setUp(self):
-        super().setUp()
-
-        # self.create_user(**self.samples[0]) takes over through `signin()`
-        # self.create_user(**self.samples[1]) takes over through `signin()`
-        self.create_user(**self.samples[2])
-        self.create_user(**self.samples[3])
-        self.create_admin(**self.samples[4])
-
     def test_retrieve(self):
-        payload = self.samples[0]
-        user, token = self.signin_as_admin(payload)
+        sample = self.samples['users'][0]
+        user, token = self.signin_as_admin(sample)
         res = self.api_request(self.LIST_URL, 'GET', token=token)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -30,8 +21,8 @@ class AllUsersListAPITests(PrivateUsersAPITests):
         self.assertEqual(token, res.data['token'])
 
     def test_invalid_retrieve_without_permission(self):
-        payload = self.samples[0]
-        user, token = self.signin(payload)
+        sample = self.samples['users'][0]
+        user, token = self.signin_as_user(sample)
         res = self.api_request(self.LIST_URL, 'GET', token=token)
 
         self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)

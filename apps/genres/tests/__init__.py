@@ -4,10 +4,12 @@ import copy
 
 from genres.models import Genre
 
-from users.tests import SAMPLES as USERS_SAMPLES
-from funds.tests import SAMPLES as FUNDS_SAMPLES
+from users.tests import UserCreateMethods
+from funds.tests import FundCreateMethods
+from users.tests import USER_SAMPLES
+from funds.tests import FUND_SAMPLES
 
-SAMPLES = [
+GENRE_SAMPLES = [
     [
         {'code': '1', 'name': 'INCOME', 'is_income': True},
         {'code': '2', 'name': 'EXPENSES', 'is_income': False},
@@ -15,20 +17,21 @@ SAMPLES = [
 ]
 
 
-class GenresTests(TestCase):
+class GenreCreateMethods:
 
-    def setUp(self):
-
-        self.samples = {
-            'users': copy.deepcopy(USERS_SAMPLES),
-            'funds': copy.deepcopy(FUNDS_SAMPLES),
-            'genres': copy.deepcopy(SAMPLES),
-        }
-
-    @staticmethod
-    def create_genre(user, genre, fund=None):
-
+    def create_genre(self, user, genre, fund=None):
         genre['user'] = user
         genre['fund'] = fund
 
         return Genre.objects.create(**genre)
+
+
+class GenresTests(TestCase, GenreCreateMethods, UserCreateMethods, FundCreateMethods):
+
+    def setUp(self):
+
+        self.samples = {
+            'users': copy.deepcopy(USER_SAMPLES),
+            'funds': copy.deepcopy(FUND_SAMPLES),
+            'genres': copy.deepcopy(GENRE_SAMPLES),
+        }

@@ -1,5 +1,3 @@
-from django.contrib.auth import get_user_model
-
 from rest_framework.test import APIClient
 
 import json
@@ -39,12 +37,6 @@ class APITests:
             res.data = json.loads(res.data)
 
         return res
-
-    def create_user(self, **sample):
-        return get_user_model().objects.create_user(**sample)
-
-    def create_admin(self, **sample):
-        return get_user_model().objects.create_superuser(**sample)
 
     def setUp(self):
         self.client = APIClient()
