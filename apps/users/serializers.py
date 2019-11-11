@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import authenticate
 from django.core.validators import MinLengthValidator
+from django.shortcuts import get_object_or_404
 
 from .models import User, error_messages
 
@@ -162,3 +163,16 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         instance.delete()
 
         return None
+
+
+class UserSerializerField(serializers.RelatedField):
+
+    def get_queryset(self):
+        return User.objects.all()
+
+    def to_representation(self, instance):
+        return {'id': instance.pk, 'username': instance.username}
+
+    def to_internal_value(self, data):
+        data = data if type(data) == int else data.id
+        return get_object_or_404(User, pk=data)

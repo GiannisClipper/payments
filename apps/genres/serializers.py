@@ -1,14 +1,18 @@
 from rest_framework import serializers
 
-from django.shortcuts import get_object_or_404
-
 from users.serializers import UserSerializerField
+from funds.serializers import FundSerializerField
 
-from .models import Fund  # , error_messages
+from .models import Genre  # , error_messages
 
 
-class FundSerializer(serializers.HyperlinkedModelSerializer):
-    '''Handles serialization and deserialization of Fund objects.'''
+def validate_fund_user(self): 
+    if self.get('fund', None) and self['fund'].user.pk != self['user'].pk:
+        raise serializers.ValidationError('Not a proper fund.')
+
+
+class GenreSerializer(serializers.HyperlinkedModelSerializer):
+    '''Handles serialization and deserialization of Genre objects.'''
 
     id = serializers.SerializerMethodField(read_only=True)
 
@@ -17,20 +21,24 @@ class FundSerializer(serializers.HyperlinkedModelSerializer):
 
     user = UserSerializerField()
 
+    fund = FundSerializerField(allow_null=True, default=None)
+
     url = serializers.HyperlinkedIdentityField(
-        view_name='funds:by-id',
+        view_name='genres:by-id',
         lookup_field='id',
         read_only=True,
     )
 
     class Meta:
-        model = Fund
-        fields = ('id', 'user', 'code', 'name', 'url')
+        model = Genre
+        fields = ('id', 'user', 'code', 'name', 'is_income', 'fund', 'url')
+
+        validators = (validate_fund_user,)
 
         # extra_kwargs = error_messages
 
     def create(self, validated_data):
-        return Fund.objects.create(**validated_data)
+        return Genre.objects.create(**validated_data)
 
     def get(self, instance):
         return instance
@@ -47,17 +55,3 @@ class FundSerializer(serializers.HyperlinkedModelSerializer):
         instance.delete()
 
         return None
-
-
-class FundSerializerField(serializers.RelatedField):
-
-    model = None
-
-    def get_queryset(self):
-        return Fund.objects.all()
-
-    def to_representation(self, instance):
-        return {'id': instance.pk, 'name': instance.name}
-
-    def to_internal_value(self, data):
-        return get_object_or_404(self.get_queryset(), pk=data)
