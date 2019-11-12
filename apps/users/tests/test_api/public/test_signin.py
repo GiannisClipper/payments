@@ -17,8 +17,7 @@ class SigninAPITests(PublicUsersAPITests):
     '''Test users signin API requests.'''
 
     def test_valid_signin(self):
-        for user in self.samples['users']:
-            self.create_user(**user)
+        self.create_users(self.samples['users'])
         sample = self.samples['users'][1]
         res = self.api_request(SIGNIN_URL, 'POST', payload=sample)
 
@@ -36,9 +35,8 @@ class SigninAPITests(PublicUsersAPITests):
         self.assertIn(PASSWORD_REQUIRED, res.data['errors']['password'])
 
     def test_invalid_signin_when_credentials_not_match(self):
-        for user in self.samples['users']:
-            self.create_user(**user)
-        sample = {'username': '*', 'password': '*'}
+        self.create_users(self.samples['users'])
+        sample = {'username': 'blabla', 'password': 'blabla'}
         res = self.api_request(SIGNIN_URL, 'POST', payload=sample)
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)

@@ -22,7 +22,7 @@ class SignupAPITests(PublicUsersAPITests):
     '''Test users signup API requests.'''
 
     def test_valid_signup(self):
-        sample = self.samples['users'][0]
+        sample = self.samples['users'][1]
         res = self.api_request(SIGNUP_URL, 'POST', payload=sample)
 
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
@@ -41,9 +41,8 @@ class SignupAPITests(PublicUsersAPITests):
         self.assertIn(EMAIL_REQUIRED, res.data['errors']['email'])
 
     def test_invalid_signup_when_values_exists_or_invalid(self):
-        for user in self.samples['users']:
-            self.create_user(**user)
-        sample = self.samples['users'][0]
+        self.create_users(self.samples['users'])
+        sample = self.samples['users'][1]
         sample['password'] = '*'
         res = self.api_request(SIGNUP_URL, 'POST', payload=sample)
 

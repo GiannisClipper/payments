@@ -4,45 +4,41 @@ from django.contrib.auth import get_user_model
 
 from core.tests.test_api import APITests
 
+from users.tests import UserCreateMethods
+
 SIGNIN_URL = reverse('users:signin')
 
 
 class PrivateAPITests(APITests):
     '''Test API requests that require authentication.'''
 
-    def _signin(self, payload):
+    def signin(self, payload):
         namespace, self.namespace = self.namespace, 'user'
         res = self.api_request(SIGNIN_URL, 'POST', payload=payload)
         self.namespace = namespace
 
         return res.data['user'], res.data['token']
 
-    def signin_as_user(self, payload):
-        for user in self.samples['users']:
-            self.create_user(**user)
 
-        return self._signin(payload)
-
-    def signin_as_admin(self, payload):
-        for user in self.samples['users']:
-            self.create_admin(**user)
-
-        return self._signin(payload)
-
-
-class OwnerPrivateAPITests(PrivateAPITests):
+class OwnerPrivateAPITests(PrivateAPITests, UserCreateMethods):
     def setUp(self):
         super().setUp()
-        sample = self.samples['users'][0]
-        user_, self.token = self.signin_as_user(sample)
+
+        self.create_users(self.samples['users'])
+        sample = self.samples['users'][1]
+        user_, self.token = self.signin(sample)
+
         self.user = get_user_model().objects.get(pk=user_['id'])
         self.user2 = get_user_model().objects.get(pk=2)
 
 
-class AdminPrivateAPITests(PrivateAPITests):
+class AdminPrivateAPITests(PrivateAPITests, UserCreateMethods):
     def setUp(self):
         super().setUp()
-        sample = self.samples['users'][0]
-        user_, self.token = self.signin_as_admin(sample)
+
+        self.create_admins(self.samples['users'])
+        sample = self.samples['users'][1]
+        user_, self.token = self.signin(sample)
+
         self.user = get_user_model().objects.get(pk=user_['id'])
         self.user2 = get_user_model().objects.get(pk=2)

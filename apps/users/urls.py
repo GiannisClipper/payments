@@ -15,36 +15,15 @@ from .views import (
 app_name = 'users'
 
 urlpatterns = [
-    path(  # POST
-        'signup/', SignupAPIView.as_view(), name='signup'
-    ),
-    path(  # POST
-        'signin/', SigninAPIView.as_view(), name='signin'
-    ),
+    path('signup/', SignupAPIView.as_view(), name='signup'),  # POST
+    path('signin/', SigninAPIView.as_view(), name='signin'),  # POST
 
-    path(  # POST, GET, PATCH, DELETE
-        'current/', CurrentUserAPIView.as_view(), name='current'
-    ),
-    path(  # POST, GET, PATCH, DELETE
-        '<int:id>/', UserByIdAPIView.as_view(), name='by-id'
-    ),
+    path('<int:id>/', UserByIdAPIView.as_view(), name='by-id'),  # POST, GET, PATCH, DELETE
+    path('current/', CurrentUserAPIView.as_view(), name='current'),  # POST, GET, PATCH, DELETE
 
-    path(  # GET
-        'all-list/', AllUsersAPIView.as_view(), name='all-list'
-    ),
-
-    path(  # GET
-        'admin-list/', AdminUsersAPIView.as_view(), name='admin-list'
-    ),
-    path(  # GET
-        'no-admin-list/', NoAdminUsersAPIView.as_view(), name='no-admin-list'
-    ),
-
-    path(  # GET
-        'active-list/', ActiveUsersAPIView.as_view(), name='active-list'
-    ),
-    path(  # GET
-        'no-active-list/', NoActiveUsersAPIView.as_view(),
-        name='no-active-list'
-    ),
+    path('all-list/', AllUsersAPIView.as_view(), name='all-list'),  # GET
+    path('admin-list/', AdminUsersAPIView.as_view(), name='admin-list'),  # GET
+    path('no-admin-list/', NoAdminUsersAPIView.as_view(), name='no-admin-list'),  # GET
+    path('active-list/', ActiveUsersAPIView.as_view(), name='active-list'),  # GET
+    path('no-active-list/', NoActiveUsersAPIView.as_view(), name='no-active-list'),  # GET
 ]

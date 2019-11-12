@@ -38,7 +38,7 @@ class UserModelBasicTests(UserModelTests):
         self.assertTrue('updated_at' in fields)
 
     def test_create_user(self):
-        sample = self.samples['users'][0]
+        sample = self.samples['users'][1]
         user = self.create_user(**sample)
 
         self.assertEqual(user.username, sample['username'])
@@ -48,7 +48,7 @@ class UserModelBasicTests(UserModelTests):
         self.assertFalse(user.is_staff)
 
     def test_create_superuser(self):
-        sample = self.samples['users'][0]
+        sample = self.samples['users'][1]
         user = self.create_admin(**sample)
 
         self.assertEqual(user.username, sample['username'])
@@ -58,9 +58,9 @@ class UserModelBasicTests(UserModelTests):
         self.assertTrue(user.is_staff)
 
     def test_update(self):
-        sample = self.samples['users'][0]
-        init_user = self.create_admin(**sample)
         sample = self.samples['users'][1]
+        init_user = self.create_admin(**sample)
+        sample = self.samples['users'][2]
         user = init_user.update(**sample)
 
         self.assertEqual(user.pk, init_user.pk)
@@ -69,14 +69,14 @@ class UserModelBasicTests(UserModelTests):
         self.assertEqual(user.email, sample['email'])
 
     def test_delete(self):
-        sample = self.samples['users'][1]
+        sample = self.samples['users'][2]
         user = self.create_admin(**sample)
         user.delete()  # Built-in method
 
         self.assertEqual(user.pk, None)
 
     def test_str_representation(self):
-        sample = self.samples['users'][0]
+        sample = self.samples['users'][1]
         user = self.create_user(**sample)
 
         self.assertEqual(str(user), sample['username'])
@@ -86,7 +86,7 @@ class UserModelValidationOnCreateTests(UserModelTests):
 
     def test_required_errors(self):
         errors = ''
-        sample = self.samples['users'][0]
+        sample = self.samples['users'][1]
         del sample['username']
         del sample['password']
         del sample['email']
@@ -102,7 +102,7 @@ class UserModelValidationOnCreateTests(UserModelTests):
 
     def test_required_errors_by_passing_empty_values(self):
         errors = ''
-        sample = self.samples['users'][0]
+        sample = self.samples['users'][1]
         sample['username'] = '        '
         sample['password'] = '        '
         sample['email'] = None
@@ -118,7 +118,7 @@ class UserModelValidationOnCreateTests(UserModelTests):
 
     def test_unique_errors(self):
         errors = ''
-        sample = self.samples['users'][0]
+        sample = self.samples['users'][1]
         self.create_user(**sample)
 
         try:
@@ -130,7 +130,7 @@ class UserModelValidationOnCreateTests(UserModelTests):
         self.assertIn(EMAIL_EXISTS, errors)
 
     def test_password_min_length(self):
-        sample = self.samples['users'][0]
+        sample = self.samples['users'][1]
         sample['password'] = '*'
 
         try:
@@ -141,7 +141,7 @@ class UserModelValidationOnCreateTests(UserModelTests):
         self.assertIn(PASSWORD_TOO_SHORT, errors)
 
     def test_email_normalization(self):
-        sample = self.samples['users'][0]
+        sample = self.samples['users'][1]
         sample['email'] = sample['email'].upper()
         user = self.create_user(**sample)
 
@@ -156,7 +156,7 @@ class UserModelValidationOnUpdateTests(UserModelTests):
 
     def test_required_errors_by_passing_empty_values(self):
         errors = ''
-        sample = self.samples['users'][0]
+        sample = self.samples['users'][1]
         user = self.create_user(**sample)
         sample['username'] = '        '
         sample['password'] = '        '
@@ -173,9 +173,9 @@ class UserModelValidationOnUpdateTests(UserModelTests):
 
     def test_unique_errors(self):
         errors = ''
-        sample1 = self.samples['users'][0]
+        sample1 = self.samples['users'][1]
         self.create_user(**sample1)
-        sample2 = self.samples['users'][1]
+        sample2 = self.samples['users'][2]
         user = self.create_user(**sample2)
 
         try:
