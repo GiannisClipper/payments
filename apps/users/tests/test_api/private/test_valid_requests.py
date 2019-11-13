@@ -1,22 +1,22 @@
 from django.urls import reverse
 from rest_framework import status
 
-from . import OwnerSigninSupported, AdminSigninSupported
+from . import UsersPrivateAPITests
 
-BY_ID_1_URL = reverse('users:by-id', kwargs={'id': 1})
-BY_ID_2_URL = reverse('users:by-id', kwargs={'id': 2})
-BY_ID_0_URL = reverse('users:by-id', kwargs={'id': 0})
+BY_ID_1_URL = reverse('users:by-id', kwargs={'id': 1})  # first admin id
+BY_ID_3_URL = reverse('users:by-id', kwargs={'id': 3})  # first owner id
+BY_ID_0_URL = reverse('users:by-id', kwargs={'id': 0})  # id not exists
 
 CURRENT_URL = reverse('users:current')
 
 
-class AdminRequestUserByIdAPITests(AdminSigninSupported):
+class AdminRequestUserByIdAPITests(UsersPrivateAPITests):
     '''Test user-by-id API by admin.'''
 
     def test_get(self):
-        sample = self.samples['users'][1]
+        sample = self.samples['admins'][1]
         user, token = self.signin(sample)
-        res = self.api_request(BY_ID_2_URL, 'GET', token=token)
+        res = self.api_request(BY_ID_3_URL, 'GET', token=token)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertNotEqual(user['username'], res.data['user']['username'])
@@ -24,11 +24,11 @@ class AdminRequestUserByIdAPITests(AdminSigninSupported):
         self.assertEqual(token, res.data['token'])
 
     def test_patch(self):
-        sample = self.samples['users'][1]
+        sample = self.samples['admins'][1]
         user, token = self.signin(sample)
         sample['username'] += 'blabla'
         sample['email'] += 'blabla'
-        res = self.api_request(BY_ID_2_URL, 'PATCH', payload=sample, token=token)
+        res = self.api_request(BY_ID_3_URL, 'PATCH', payload=sample, token=token)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertNotEqual(user['id'], res.data['user']['id'])
@@ -37,19 +37,19 @@ class AdminRequestUserByIdAPITests(AdminSigninSupported):
         self.assertEqual(token, res.data['token'])
 
     def test_delete(self):
-        sample = self.samples['users'][1]
+        sample = self.samples['admins'][1]
         user, token = self.signin(sample)
-        res = self.api_request(BY_ID_2_URL, 'DELETE', payload=sample, token=token)
+        res = self.api_request(BY_ID_3_URL, 'DELETE', payload=sample, token=token)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual({}, res.data['user'])
         self.assertEqual(token, res.data['token'])
 
 
-class OwnerRequestUserByIdAPITests(OwnerSigninSupported):
+class OwnerRequestUserByIdAPITests(UsersPrivateAPITests):
     '''Test user-by-id API by owner.'''
 
-    URL = BY_ID_1_URL
+    URL = BY_ID_3_URL
 
     def test_get(self):
         sample = self.samples['users'][1]
@@ -89,13 +89,13 @@ class CurrentUserAPITests(OwnerRequestUserByIdAPITests):
     URL = CURRENT_URL
 
 
-class AdmninGetListAPITests(AdminSigninSupported):
+class AdmninGetListAPITests(UsersPrivateAPITests):
     '''Test all users list API.'''
 
     LIST_URL = reverse('users:all-list')
 
     def test_get(self):
-        sample = self.samples['users'][1]
+        sample = self.samples['admins'][1]
         user, token = self.signin(sample)
         res = self.api_request(self.LIST_URL, 'GET', token=token)
 

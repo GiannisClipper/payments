@@ -22,7 +22,7 @@ class CreateFundAPIView(APIView):
         fund = request.data.get('fund', {})
 
         if not request.user.is_staff:
-            fund['user'] = request.user.pk
+            fund['user'] = {'id': request.user.pk}
 
         serializer = self.serializer_class(
             data=fund,

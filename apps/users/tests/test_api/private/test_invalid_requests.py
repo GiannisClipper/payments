@@ -1,7 +1,7 @@
 from django.urls import reverse
 from rest_framework import status
 
-from . import OwnerSigninSupported, AdminSigninSupported
+from . import UsersPrivateAPITests
 
 from users.constants import (
     USERNAME_REQUIRED,
@@ -13,22 +13,26 @@ from users.constants import (
     INPUT_NOT_MATCH,
 )
 
-BY_ID_1_URL = reverse('users:by-id', kwargs={'id': 1})
-BY_ID_2_URL = reverse('users:by-id', kwargs={'id': 2})
-BY_ID_0_URL = reverse('users:by-id', kwargs={'id': 0})
+BY_ID_1_URL = reverse('users:by-id', kwargs={'id': 1})  # first admin id
+BY_ID_3_URL = reverse('users:by-id', kwargs={'id': 3})  # first owner id
+BY_ID_0_URL = reverse('users:by-id', kwargs={'id': 0})  # id not exists
 
 CURRENT_URL = reverse('users:current')
 
 
-class AdminGetUserByIdAPITests(AdminSigninSupported):
+class AdminGetUserByIdAPITests(UsersPrivateAPITests):
     '''Test admin's invalid GET requests to users API.'''
 
-    URL = BY_ID_2_URL
+    URL = BY_ID_3_URL
 
     METHOD = 'GET'
 
+    def setUp(self):
+        super().setUp()
+        self.SIGNIN_USER = self.samples['admins'][1]
+
     def test_when_id_not_exists(self):
-        sample = self.samples['users'][1]
+        sample = self.SIGNIN_USER
         user, token = self.signin(sample)
         res = self.api_request(BY_ID_0_URL, self.METHOD, token=token)
 
@@ -43,9 +47,9 @@ class AdminPatchUserByIdAPITests(AdminGetUserByIdAPITests):
     METHOD = 'PATCH'
 
     def test_when_values_exists_or_invalid(self):
-        sample = self.samples['users'][1]
+        sample = self.SIGNIN_USER
         user, token = self.signin(sample)
-        sample = self.samples['users'][3]
+        sample = self.samples['admins'][2]
         sample['password'] = '*'
         res = self.api_request(self.URL, self.METHOD, payload=sample, token=token)
 
@@ -57,7 +61,7 @@ class AdminPatchUserByIdAPITests(AdminGetUserByIdAPITests):
         self.assertEqual(token, res.data['token'])
 
     def test_when_values_are_empty(self):
-        sample = self.samples['users'][1]
+        sample = self.SIGNIN_USER
         user, token = self.signin(sample)
         sample['username'] = ''
         sample['password'] = ''
@@ -78,7 +82,7 @@ class AdminDeleteUserByIdAPITests(AdminGetUserByIdAPITests):
     METHOD = 'DELETE'
 
     def test_when_not_authenticate_well(self):
-        sample = self.samples['users'][1]
+        sample = self.SIGNIN_USER
         user, token = self.signin(sample)
         sample['password'] = 'blabla'
         res = self.api_request(self.URL, self.METHOD, payload=sample, token=token)
@@ -89,17 +93,17 @@ class AdminDeleteUserByIdAPITests(AdminGetUserByIdAPITests):
         self.assertEqual(token, res.data['token'])
 
 
-class OwnerGetUserByIdAPITests(OwnerSigninSupported, AdminGetUserByIdAPITests):
+class OwnerGetUserByIdAPITests(AdminGetUserByIdAPITests):
     '''Test owner's invalid GET requests to users API.'''
 
-    URL = BY_ID_1_URL
-
-    METHOD = 'GET'
+    def setUp(self):
+        super().setUp()
+        self.SIGNIN_USER = self.samples['users'][1]
 
     def test_unauthorized_request(self):
-        sample = self.samples['users'][1]
+        sample = self.SIGNIN_USER
         user, token = self.signin(sample)
-        res = self.api_request(BY_ID_2_URL, self.METHOD, token=token)
+        res = self.api_request(BY_ID_1_URL, self.METHOD, token=token)
 
         self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
         self.assertIn('errors', res.data)
@@ -109,13 +113,9 @@ class OwnerGetUserByIdAPITests(OwnerSigninSupported, AdminGetUserByIdAPITests):
 class OwnerPatchUserByIdAPITests(OwnerGetUserByIdAPITests, AdminPatchUserByIdAPITests):
     '''Test owner's invalid PATCH requests to users API.'''
 
-    METHOD = 'PATCH'
-
 
 class OwnerDeleteUserByIdAPITests(OwnerGetUserByIdAPITests, AdminDeleteUserByIdAPITests):
     '''Test owner's invalid DELETE requests to users API.'''
-
-    METHOD = 'DELETE'
 
 
 class OwnerGetCurrentUserAPITests(OwnerGetUserByIdAPITests):
@@ -136,7 +136,7 @@ class OwnerDeleteCurrentUserAPITests(OwnerDeleteUserByIdAPITests):
     URL = CURRENT_URL
 
 
-class OwnerGetListAPITests(OwnerSigninSupported):
+class OwnerGetListAPITests(UsersPrivateAPITests):
     '''Test all users list API.'''
 
     LIST_URL = reverse('users:all-list')

@@ -1,8 +1,8 @@
 from rest_framework import status
 
-from genres.tests.test_api import ROOT_URL, BY_ID_1_URL  #  , LIST_URL
+from genres.tests.test_api import ROOT_URL, BY_ID_1_URL  # , LIST_URL
 
-from . import OwnerPrivateGenresAPITests, AdminPrivateGenresAPITests #  , ListAPITests
+from . import OwnerPrivateGenresAPITests, AdminPrivateGenresAPITests  # , ListAPITests
 
 
 class OwnerRequest(OwnerPrivateGenresAPITests):
@@ -22,7 +22,6 @@ class OwnerRequest(OwnerPrivateGenresAPITests):
         self.assertEqual(res.data['genre']['fund']['name'], self.fund.name)
         self.assertIn(f"/genres/{res.data['genre']['id']}/", res.data['genre']['url'])
         self.assertEqual(res.data['token'], self.token)
-
 
     def test_get(self):
         sample = self.samples['genres'][0][0]

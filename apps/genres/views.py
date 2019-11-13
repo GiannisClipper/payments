@@ -4,7 +4,6 @@ from rest_framework.views import APIView
 from rest_framework.generics import RetrieveUpdateDestroyAPIView  # , RetrieveAPIView
 from rest_framework.response import Response
 
-from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 
 from .models import Genre
@@ -59,8 +58,8 @@ class GenreByIdAPIView(RetrieveUpdateDestroyAPIView):
     def update(self, request, *args, **kwargs):
         genre = self.get_object()
         data = request.data.get('genre', {})
-        
-        if not 'user' in data.items():
+
+        if 'user' not in data.items():
             data['user'] = genre.user  # to validate genre.user == genre.fund.user
 
         serializer = self.serializer_class(

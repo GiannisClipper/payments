@@ -174,5 +174,4 @@ class UserSerializerField(serializers.RelatedField):
         return {'id': instance.pk, 'username': instance.username}
 
     def to_internal_value(self, data):
-        data = data if type(data) == int else data.id
-        return get_object_or_404(User, pk=data)
+        return get_object_or_404(User, pk=data['id'])

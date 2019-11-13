@@ -2,36 +2,42 @@ from django.test import TestCase
 
 import copy
 
+from django.contrib.auth import get_user_model
+
 from funds.models import Fund
 
 from users.tests import UserCreateMethods
-from users.tests import USER_SAMPLES
+from users.tests import ADMIN_SAMPLES, USER_SAMPLES
 
-FUND_SAMPLES = [
-    [
-        {'code': '1', 'name': 'CASH'},
-        {'code': '2', 'name': 'VISA'},
-        {'code': '3', 'name': 'MASTERCARD'},
-    ],
-    [
-        {'code': '1', 'name': 'CASH'},
-        {'code': '2', 'name': 'PREPAID CARD'},
-    ],
-]
+FUND_SAMPLES = {
+    1: {'user': {'id': 1}, 'code': '1', 'name': 'CASH'},
+    2: {'user': {'id': 1}, 'code': '2', 'name': 'VISA'},
+    3: {'user': {'id': 1}, 'code': '3', 'name': 'MASTERCARD'},
+    4: {'user': {'id': 2}, 'code': '1', 'name': 'CASH'},
+    5: {'user': {'id': 2}, 'code': '2', 'name': 'PREPAID CARD'},
+}
 
 
 class FundCreateMethods:
 
-    def create_fund(self, user, fund):
-        fund['user'] = user
+    def create_fund(self, **fund):
+        fund['user'] = get_user_model().objects.get(pk=fund['user']['id'])
 
         return Fund.objects.create(**fund)
+
+    def create_funds(self, samples):
+        for fund in samples.values():
+            self.create_fund(**fund)
 
 
 class FundsTests(TestCase, FundCreateMethods, UserCreateMethods):
 
     def setUp(self):
         self.samples = {
+            'admins': copy.deepcopy(ADMIN_SAMPLES),
             'users': copy.deepcopy(USER_SAMPLES),
             'funds': copy.deepcopy(FUND_SAMPLES),
         }
+
+        self.create_admins(self.samples['admins'])
+        self.create_users(self.samples['users'])

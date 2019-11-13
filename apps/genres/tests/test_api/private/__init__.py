@@ -13,6 +13,7 @@ class OwnerPrivateGenresAPITests(GenresAPITests, OwnerPrivateAPITests):
         fund_ = self.samples['funds'][0][1]
         self.fund2 = self.create_fund(self.user, fund_)
 
+
 class AdminPrivateGenresAPITests(GenresAPITests, AdminPrivateAPITests):
     '''Test genres API requests that require admin authentication.'''
 

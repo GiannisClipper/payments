@@ -37,6 +37,16 @@ class UserModelBasicTests(UserModelTests):
         self.assertTrue('created_at' in fields)
         self.assertTrue('updated_at' in fields)
 
+    def test_create_superuser(self):
+        sample = self.samples['admins'][1]
+        user = self.create_admin(**sample)
+
+        self.assertEqual(user.username, sample['username'])
+        self.assertTrue(user.check_password(sample['password']))
+        self.assertEqual(user.email, sample['email'])
+        self.assertTrue(user.is_superuser)
+        self.assertTrue(user.is_staff)
+
     def test_create_user(self):
         sample = self.samples['users'][1]
         user = self.create_user(**sample)
@@ -47,19 +57,9 @@ class UserModelBasicTests(UserModelTests):
         self.assertFalse(user.is_superuser)
         self.assertFalse(user.is_staff)
 
-    def test_create_superuser(self):
-        sample = self.samples['users'][1]
-        user = self.create_admin(**sample)
-
-        self.assertEqual(user.username, sample['username'])
-        self.assertTrue(user.check_password(sample['password']))
-        self.assertEqual(user.email, sample['email'])
-        self.assertTrue(user.is_superuser)
-        self.assertTrue(user.is_staff)
-
     def test_update(self):
         sample = self.samples['users'][1]
-        init_user = self.create_admin(**sample)
+        init_user = self.create_user(**sample)
         sample = self.samples['users'][2]
         user = init_user.update(**sample)
 
@@ -69,8 +69,8 @@ class UserModelBasicTests(UserModelTests):
         self.assertEqual(user.email, sample['email'])
 
     def test_delete(self):
-        sample = self.samples['users'][2]
-        user = self.create_admin(**sample)
+        sample = self.samples['users'][1]
+        user = self.create_user(**sample)
         user.delete()  # Built-in method
 
         self.assertEqual(user.pk, None)

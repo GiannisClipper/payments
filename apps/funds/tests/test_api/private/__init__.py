@@ -1,28 +1,25 @@
 from funds.tests.test_api import FundsAPITests
-from core.tests.test_api.private import OwnerPrivateAPITests, AdminPrivateAPITests
+from core.tests.test_api.private import PrivateAPITests
 
 
-class OwnerPrivateFundsAPITests(FundsAPITests, OwnerPrivateAPITests):
-    '''Test funds API requests that require owner authentication.'''
-
-    def setUp(self):
-        FundsAPITests.setUp(self)
-        OwnerPrivateAPITests.setUp(self)
-
-
-class AdminPrivateFundsAPITests(FundsAPITests, AdminPrivateAPITests):
+class AdminPrivateFundsAPITests(FundsAPITests, PrivateAPITests):
     '''Test funds API requests that require admin authentication.'''
 
     def setUp(self):
         FundsAPITests.setUp(self)
-        AdminPrivateAPITests.setUp(self)
+        PrivateAPITests.setUp(self)
+
+        sample = self.samples['admins'][1]
+        self.user, self.token = self.signin(sample)
 
 
-class ListAPITests:
-    '''Test list requests to funds API.'''
+class OwnerPrivateFundsAPITests(FundsAPITests, PrivateAPITests):
+    '''Test funds API requests that require owner authentication.'''
 
     def setUp(self):
-        for sample in self.samples['funds'][0]:
-            self.create_fund(self.user, sample)
-        for sample in self.samples['funds'][1]:
-            self.create_fund(self.user2, sample)
+        FundsAPITests.setUp(self)
+        PrivateAPITests.setUp(self)
+
+        sample = self.samples['users'][1]
+        self.user, self.token = self.signin(sample)
+
