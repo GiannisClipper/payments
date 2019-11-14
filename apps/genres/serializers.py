@@ -8,6 +8,7 @@ from .models import Genre  # , error_messages
 
 def validate_fund_user(self):
     if self.get('fund', None) and self['fund'].user.pk != self['user'].pk:
+        print(self['fund'].user.pk, '!=', self['user'].pk)
         raise serializers.ValidationError('Not a proper fund.')
 
 

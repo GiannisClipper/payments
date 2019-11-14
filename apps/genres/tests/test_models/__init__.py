@@ -10,10 +10,7 @@ from genres.tests import GenresTests
 
 
 class GenreModelTests(GenresTests):
-    def setUp(self):
-        super().setUp()
-        self.create_users(self.samples['users'])
-        self.create_funds(self.samples['funds'])
+    pass
 
 
 class GenreModelBasicTests(GenreModelTests):

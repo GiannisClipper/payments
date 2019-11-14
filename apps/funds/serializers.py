@@ -60,4 +60,4 @@ class FundSerializerField(serializers.RelatedField):
         return {'id': instance.pk, 'name': instance.name}
 
     def to_internal_value(self, data):
-        return get_object_or_404(self.get_queryset(), pk=data)
+        return get_object_or_404(self.get_queryset(), pk=data['id'])

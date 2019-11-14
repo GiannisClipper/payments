@@ -22,4 +22,3 @@ class OwnerPrivateFundsAPITests(FundsAPITests, PrivateAPITests):
 
         sample = self.samples['users'][1]
         self.user, self.token = self.signin(sample)
-

@@ -1,3 +1,4 @@
+from unittest import skip  # noqa: F401
 from django.urls import reverse
 from rest_framework import status
 

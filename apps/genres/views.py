@@ -1,15 +1,16 @@
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
-from rest_framework.generics import RetrieveUpdateDestroyAPIView  # , RetrieveAPIView
+from rest_framework.generics import RetrieveUpdateDestroyAPIView, RetrieveAPIView
 from rest_framework.response import Response
 
+from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 
 from .models import Genre
 from users.permissions import IsAdminUserOrOwner
 from .serializers import GenreSerializer
-from .renderers import GenreJSONRenderer  # , GenresJSONRenderer
+from .renderers import GenreJSONRenderer, GenresJSONRenderer
 
 
 class CreateGenreAPIView(APIView):
@@ -21,7 +22,7 @@ class CreateGenreAPIView(APIView):
         genre = request.data.get('genre', {})
 
         if not request.user.is_staff:
-            genre['user'] = request.user.pk
+            genre['user'] = {'id': request.user.pk}
 
         serializer = self.serializer_class(
             data=genre,
@@ -59,8 +60,8 @@ class GenreByIdAPIView(RetrieveUpdateDestroyAPIView):
         genre = self.get_object()
         data = request.data.get('genre', {})
 
-        if 'user' not in data.items():
-            data['user'] = genre.user  # to validate genre.user == genre.fund.user
+        if 'user' not in data:
+            data['user'] = {'id': genre.user.pk}  # to validate genre.user == genre.fund.user
 
         serializer = self.serializer_class(
             genre,
@@ -84,3 +85,45 @@ class GenreByIdAPIView(RetrieveUpdateDestroyAPIView):
         serializer.delete(genre)
 
         return Response({}, status=status.HTTP_200_OK)
+
+
+class ListGenresAPIView(RetrieveAPIView):
+    permission_classes = (IsAdminUserOrOwner,)
+    serializer_class = GenreSerializer
+    renderer_classes = (GenresJSONRenderer,)
+
+    def get_queryset(self, request):
+        user = None
+        user_id = request.query_params.get('user_id', None)
+
+        # Convert parameters
+        try: user_id = None if not user_id else int(user_id)  # noqa: E701
+        except Exception: user_id = -1  # noqa: E701
+
+        # Check permissions
+        if not request.user.is_staff:
+            if not user_id or user_id == request.user.pk:
+                user = request.user
+            self.check_object_permissions(request, user)
+
+        # Check if parameter exists
+        if not user and user_id:
+            user = get_object_or_404(get_user_model(), pk=user_id)
+
+        if user:
+            data = Genre.objects.filter(user=user)
+        else:
+            data = Genre.objects.all()
+
+        return data
+
+    def retrieve(self, request, *args, **kwargs):
+        queryset = self.get_queryset(request)
+
+        serializer = self.serializer_class(
+            queryset,
+            many=True,
+            context={'request': request}  # required by url field
+        )
+
+        return Response({'objects': serializer.data}, status=status.HTTP_200_OK)

@@ -7,7 +7,7 @@ from django.contrib.auth import get_user_model
 from funds.models import Fund
 
 from users.tests import UserCreateMethods
-from users.tests import ADMIN_SAMPLES, USER_SAMPLES
+from users.tests import USER_SAMPLES, ADMIN_SAMPLES
 
 FUND_SAMPLES = {
     1: {'user': {'id': 1}, 'code': '1', 'name': 'CASH'},
@@ -34,10 +34,10 @@ class FundsTests(TestCase, FundCreateMethods, UserCreateMethods):
 
     def setUp(self):
         self.samples = {
-            'admins': copy.deepcopy(ADMIN_SAMPLES),
             'users': copy.deepcopy(USER_SAMPLES),
+            'admins': copy.deepcopy(ADMIN_SAMPLES),
             'funds': copy.deepcopy(FUND_SAMPLES),
         }
 
-        self.create_admins(self.samples['admins'])
         self.create_users(self.samples['users'])
+        self.create_admins(self.samples['admins'])
