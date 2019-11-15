@@ -12,7 +12,7 @@ class AdminRequests(AdminPrivateFundsAPITests):
     # Signed admin has id > 1 other than owner's id in samples (funds)
 
     def test_post(self):
-        sample = self.samples['funds'][1]
+        sample = self.samples['funds'][11]
 
         res = self.api_request(ROOT_URL, 'POST', payload=sample, token=self.token)
 
@@ -25,7 +25,7 @@ class AdminRequests(AdminPrivateFundsAPITests):
         self.assertEqual(res.data['token'], self.token)
 
     def test_get(self):
-        sample = self.samples['funds'][1]
+        sample = self.samples['funds'][11]
         self.create_fund(**sample)
 
         res = self.api_request(BY_ID_1_URL, 'GET', token=self.token)
@@ -39,9 +39,9 @@ class AdminRequests(AdminPrivateFundsAPITests):
         self.assertEqual(res.data['token'], self.token)
 
     def test_patch(self):
-        sample = self.samples['funds'][1]
+        sample = self.samples['funds'][11]
         self.create_fund(**sample)
-        sample = self.samples['funds'][2]
+        sample = self.samples['funds'][12]
 
         res = self.api_request(BY_ID_1_URL, 'PATCH', payload=sample, token=self.token)
 
@@ -53,7 +53,7 @@ class AdminRequests(AdminPrivateFundsAPITests):
         self.assertEqual(res.data['token'], self.token)
 
     def test_delete(self):
-        sample = self.samples['funds'][1]
+        sample = self.samples['funds'][11]
         self.create_fund(**sample)
 
         res = self.api_request(BY_ID_1_URL, 'DELETE', token=self.token)

@@ -10,11 +10,13 @@ from users.tests import UserCreateMethods
 from users.tests import USER_SAMPLES, ADMIN_SAMPLES
 
 FUND_SAMPLES = {
-    1: {'user': {'id': 1}, 'code': '1', 'name': 'CASH'},
-    2: {'user': {'id': 1}, 'code': '2', 'name': 'VISA'},
-    3: {'user': {'id': 1}, 'code': '3', 'name': 'MASTERCARD'},
-    4: {'user': {'id': 2}, 'code': '1', 'name': 'CASH'},
-    5: {'user': {'id': 2}, 'code': '2', 'name': 'PREPAID CARD'},
+    # First key digit is equal to user id
+
+    11: {'user': {'id': 1}, 'code': '1', 'name': 'CASH'},
+    12: {'user': {'id': 1}, 'code': '2', 'name': 'VISA'},
+    13: {'user': {'id': 1}, 'code': '3', 'name': 'MASTERCARD'},
+    21: {'user': {'id': 2}, 'code': '1', 'name': 'CASH'},
+    22: {'user': {'id': 2}, 'code': '2', 'name': 'PREPAID CARD'},
 }
 
 
@@ -24,6 +26,7 @@ class FundCreateMethods:
         fund['user'] = get_user_model().objects.get(pk=fund['user']['id'])
 
         return Fund.objects.create(**fund)
+
 
     def create_funds(self, samples):
         for fund in samples.values():

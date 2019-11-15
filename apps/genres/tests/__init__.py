@@ -14,14 +14,16 @@ from users.tests import USER_SAMPLES, ADMIN_SAMPLES
 from funds.tests import FUND_SAMPLES
 
 GENRE_SAMPLES = {
-    1: {'user': {'id': 1}, 'fund': {'id': 1}, 'code': '1', 'name': 'INCOME',
-        'is_income': True},
-    2: {'user': {'id': 1}, 'fund': {'id': 1}, 'code': '2', 'name': 'EXPENSES',
-        'is_income': False},
-    3: {'user': {'id': 2}, 'fund': {'id': 1}, 'code': 'ES', 'name': 'ESODA',
-        'is_income': True},
-    4: {'user': {'id': 2}, 'fund': {'id': 1}, 'code': 'EX', 'name': 'EXODA',
-        'is_income': False},
+    # First key digit is equal to user id
+
+    11: {'user': {'id': 1}, 'fund': {'id': 1}, 'code': '1', 'name': 'INCOME',
+            'is_income': True},
+    12: {'user': {'id': 1}, 'fund': {'id': 1}, 'code': '2', 'name': 'EXPENSES',
+            'is_income': False},
+    21: {'user': {'id': 2}, 'fund': {'id': 1}, 'code': 'ES', 'name': 'ESODA',
+            'is_income': True},
+    22: {'user': {'id': 2}, 'fund': {'id': 1}, 'code': 'EX', 'name': 'EXODA',
+            'is_income': False},
 }
 
 

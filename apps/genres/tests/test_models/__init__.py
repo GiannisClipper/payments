@@ -25,7 +25,7 @@ class GenreModelBasicTests(GenreModelTests):
         self.assertTrue('fund' in fields)
 
     def test_create(self):
-        genre_ = self.samples['genres'][1]
+        genre_ = self.samples['genres'][11]
         genre1 = self.create_genre(**genre_)
 
         self.assertEqual(genre1.user.id, genre_['user']['id'])
@@ -34,9 +34,9 @@ class GenreModelBasicTests(GenreModelTests):
         self.assertEqual(genre1.fund.id, genre_['fund']['id'])
 
     def test_update(self):
-        genre_ = self.samples['genres'][1]
+        genre_ = self.samples['genres'][11]
         genre1 = self.create_genre(**genre_)
-        genre_ = self.samples['genres'][2]
+        genre_ = self.samples['genres'][12]
         genre_.pop('user', None)
         genre_['fund'] = Fund.objects.get(pk=2)
         genre2 = genre1.update(**genre_)
@@ -47,7 +47,7 @@ class GenreModelBasicTests(GenreModelTests):
         self.assertEqual(genre2.fund.id, genre_['fund'].id)
 
     def test_delete(self):
-        genre_ = self.samples['genres'][1]
+        genre_ = self.samples['genres'][11]
         genre1 = self.create_genre(**genre_)
 
         genre1.delete()  # Built-in method
@@ -55,7 +55,7 @@ class GenreModelBasicTests(GenreModelTests):
         self.assertEqual(genre1.pk, None)
 
     def test_str_representation(self):
-        genre_ = self.samples['genres'][1]
+        genre_ = self.samples['genres'][11]
         genre1 = self.create_genre(**genre_)
 
         self.assertEqual(str(genre1), genre_['name'])
@@ -65,7 +65,7 @@ class GenreModelValidationOnCreateTests(GenreModelTests):
 
     def test_required_errors(self):
         errors = ''
-        genre_ = self.samples['genres'][1]
+        genre_ = self.samples['genres'][11]
         genre_.pop('user', None)
         genre_.pop('code', None)
         genre_.pop('name', None)
@@ -83,7 +83,7 @@ class GenreModelValidationOnCreateTests(GenreModelTests):
 
     def test_required_errors_by_passing_empty_values(self):
         errors = ''
-        genre_ = self.samples['genres'][1]
+        genre_ = self.samples['genres'][11]
         genre_['user'] = None
         genre_['code'] = '        '
         genre_['name'] = '        '
@@ -101,7 +101,7 @@ class GenreModelValidationOnCreateTests(GenreModelTests):
 
     def test_unique_errors(self):
         errors = ''
-        genre_ = self.samples['genres'][1]
+        genre_ = self.samples['genres'][11]
         self.create_genre(**genre_)
 
         try:
@@ -113,7 +113,7 @@ class GenreModelValidationOnCreateTests(GenreModelTests):
         self.assertEqual(2, len(errors['__all__']))
 
     def test_same_values_to_other_users(self):
-        genre_ = self.samples['genres'][1]
+        genre_ = self.samples['genres'][11]
         genre1 = self.create_genre(**genre_)
 
         genre_['user']['id'] = 2
@@ -128,7 +128,7 @@ class GenreModelValidationOnUpdateTests(GenreModelTests):
 
     def test_required_errors_by_passing_empty_values(self):
         errors = ''
-        genre_ = self.samples['genres'][1]
+        genre_ = self.samples['genres'][11]
         genre1 = self.create_genre(**genre_)
         genre_['user'] = None
         genre_['code'] = '        '
@@ -147,11 +147,11 @@ class GenreModelValidationOnUpdateTests(GenreModelTests):
 
     def test_unique_errors(self):
         errors = ''
-        genre_ = self.samples['genres'][1]
+        genre_ = self.samples['genres'][11]
         self.create_genre(**genre_)
-        genre_ = self.samples['genres'][2]
+        genre_ = self.samples['genres'][12]
         genre2 = self.create_genre(**genre_)
-        genre_ = self.samples['genres'][1]
+        genre_ = self.samples['genres'][11]
         genre_.pop('user', None)
         genre_.pop('fund', None)
 
@@ -164,9 +164,9 @@ class GenreModelValidationOnUpdateTests(GenreModelTests):
         self.assertEqual(2, len(errors['__all__']))
 
     def test_same_values_to_other_users(self):
-        genre_ = self.samples['genres'][1]
+        genre_ = self.samples['genres'][11]
         genre1 = self.create_genre(**genre_)
-        genre_ = self.samples['genres'][2]
+        genre_ = self.samples['genres'][12]
         genre2 = self.create_genre(**genre_)
         genre_['user'] = get_user_model().objects.get(pk=2)
         genre_.pop('fund', None)

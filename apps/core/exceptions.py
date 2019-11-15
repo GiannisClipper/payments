@@ -31,7 +31,6 @@ def _handle_generic_error(exc, context, response):
         data = {'errors': response.data['detail']}
     else:
         data = {'errors': response.data}
-
     response.data = data
 
     return response

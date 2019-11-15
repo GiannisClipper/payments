@@ -1,19 +1,19 @@
 from unittest import skip  # noqa: F401
 from rest_framework import status
 
-from funds.tests.test_api import ROOT_URL, BY_ID_1_URL, LIST_URL
+from genres.tests.test_api import ROOT_URL, BY_ID_1_URL, LIST_URL
 
-from . import AdminPrivateFundsAPITests, OwnerPrivateFundsAPITests
+from . import AdminPrivateGenresAPITests, OwnerPrivateGenresAPITests
 
 
-class AdminPost(AdminPrivateFundsAPITests):
+class AdminPost(AdminPrivateGenresAPITests):
     '''Test admin's invalid POST requests to funds API.'''
 
     METHOD = 'POST'
 
     def test_when_values_exists(self):
-        sample = self.samples['funds'][11]
-        self.create_fund(**sample)
+        sample = self.samples['genres'][11]
+        self.create_genre(**sample)
 
         res = self.api_request(ROOT_URL, self.METHOD, payload=sample, token=self.token)
 
@@ -33,8 +33,17 @@ class AdminPost(AdminPrivateFundsAPITests):
         self.assertIn('name', res.data['errors'])
         self.assertEqual(res.data['token'], self.token)
 
+    def test_when_invalid_fund_user(self):
+        sample = self.samples['genres'][11]
+        sample['fund']['id'] = self.samples['funds'][21].id
+        res = self.api_request(ROOT_URL, self.METHOD, payload=sample, token=self.token)
 
-class AdminGet(AdminPrivateFundsAPITests):
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('errors', res.data)
+        self.assertEqual(res.data['token'], self.token)
+
+
+class AdminGet(AdminPrivateGenresAPITests):
     '''Test admin's invalid GET requests to funds API.'''
 
     METHOD = 'GET'
@@ -53,10 +62,10 @@ class AdminPatch(AdminGet):
     METHOD = 'PATCH'
 
     def test_when_values_exists(self):
-        sample = self.samples['funds'][11]
-        self.create_fund(**sample)
-        sample = self.samples['funds'][12]
-        self.create_fund(**sample)
+        sample = self.samples['genres'][11]
+        self.create_genre(**sample)
+        sample = self.samples['genres'][12]
+        self.create_genre(**sample)
         sample.pop('user', None)
 
         res = self.api_request(BY_ID_1_URL, 'PATCH', payload=sample, token=self.token)
@@ -66,8 +75,8 @@ class AdminPatch(AdminGet):
         self.assertEqual(res.data['token'], self.token)
 
     def test_when_values_are_empty(self):
-        sample = self.samples['funds'][11]
-        self.create_fund(**sample)
+        sample = self.samples['genres'][11]
+        self.create_genre(**sample)
         sample = {'user': None, 'code': None, 'name': None}
 
         res = self.api_request(BY_ID_1_URL, self.METHOD, payload=sample, token=self.token)
@@ -88,7 +97,7 @@ class AdminDelete(AdminGet):
     # To be executed the inherited tests
 
 
-class OwnerPost(OwnerPrivateFundsAPITests, AdminPost):
+class OwnerPost(OwnerPrivateGenresAPITests, AdminPost):
     '''Test owner's invalid POST requests to funds API.'''
 
     def test_when_values_are_missing(self):
@@ -104,15 +113,15 @@ class OwnerPost(OwnerPrivateFundsAPITests, AdminPost):
         self.assertEqual(res.data['token'], self.token)
 
 
-class OwnerGet(OwnerPrivateFundsAPITests, AdminGet):
+class OwnerGet(OwnerPrivateGenresAPITests, AdminGet):
     '''Test owner's invalid GET requests to funds API.'''
 
     METHOD = 'GET'
 
     def test_unauthorized_request(self):
-        sample = self.samples['funds'][11]
+        sample = self.samples['genres'][11]
         sample['user']['id'] = self.user['id'] + 1  # not equal to id of signed user
-        self.create_fund(**sample)
+        self.create_genre(**sample)
 
         res = self.api_request(BY_ID_1_URL, self.METHOD, token=self.token)
 
@@ -133,7 +142,7 @@ class OwnerDelete(OwnerGet, AdminDelete):
     METHOD = 'DELETE'
 
 
-class AdminGetList(AdminPrivateFundsAPITests):
+class AdminGetList(AdminPrivateGenresAPITests):
     '''Test admin's invalid GET requests to funds API.'''
 
     METHOD = 'GET'
@@ -146,7 +155,7 @@ class AdminGetList(AdminPrivateFundsAPITests):
         self.assertEqual(res.data['token'], self.token)
 
 
-class OwnerGetList(OwnerPrivateFundsAPITests):
+class OwnerGetList(OwnerPrivateGenresAPITests):
     '''Test owner's invalid list requests to funds API.'''
 
     METHOD = 'GET'
