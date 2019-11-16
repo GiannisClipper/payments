@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'users',
     'funds',
     'genres',
+    'payments',
 
     # end custom settings
 ]

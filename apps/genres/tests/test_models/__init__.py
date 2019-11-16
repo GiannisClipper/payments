@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError
 
 from django.contrib.auth import get_user_model
 
-from genres.models import Fund
+from funds.models import Fund
 from genres.models import Genre
 
 from genres.tests import GenresTests
@@ -21,7 +21,7 @@ class GenreModelBasicTests(GenreModelTests):
         self.assertTrue('user' in fields)
         self.assertTrue('code' in fields)
         self.assertTrue('name' in fields)
-        self.assertTrue('is_income' in fields)
+        self.assertTrue('is_incoming' in fields)
         self.assertTrue('fund' in fields)
 
     def test_create(self):

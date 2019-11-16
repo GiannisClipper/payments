@@ -3,10 +3,11 @@ from django.db import models
 from django.contrib.auth import get_user_model
 
 from funds.models import Fund
+from genres.models import Genre
 
 
-class Genre(models.Model):
-    '''Model represents and stores genres.'''
+class Payment(models.Model):
+    '''Model represents and stores payments.'''
 
     user = models.ForeignKey(
         get_user_model(),
@@ -15,38 +16,54 @@ class Genre(models.Model):
         blank=False,
     )
 
-    code = models.CharField(
-        max_length=8,
+    date = models.DateField(
+        db_index=True,
         null=False,
         blank=False,
     )
 
-    name = models.CharField(
-        max_length=128,
+    genre = models.ForeignKey(
+        Genre,
+        on_delete=models.CASCADE,
         null=False,
         blank=False,
     )
 
-    is_incoming = models.BooleanField(
-        default=False
+    incoming = models.DecimalField(
+        max_digits=9,
+        decimal_places=2,
+        null=True,
+        blank=True,
+    )
+
+    outgoing = models.DecimalField(
+        max_digits=9,
+        decimal_places=2,
+        null=True,
+        blank=True,
     )
 
     fund = models.ForeignKey(
         Fund,
-        on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,
+        null=False,
+        blank=False,
+    )
+
+    remarks = models.CharField(
+        max_length=128,
         null=True,
         blank=True,
     )
 
     class Meta:
         unique_together = (
-            ('user', 'code'),
-            ('user', 'name'),
+            ('user', 'date', 'genre', 'incoming', 'outgoing', 'fund', 'remarks'),
+            # Seems that unique_together does not work properly with null values
         )
 
         index_together = (
-            ('user', 'code'),
-            ('user', 'name'),
+            ('user', 'date'),
         )
 
     def save(self, *args, **kwargs):
@@ -74,4 +91,6 @@ class Genre(models.Model):
         return self
 
     def __str__(self):
-        return f'{self.name}'
+        amount = self.incoming if self.genre.is_incoming else self.outgoing
+
+        return f'{self.genre.name} {self.date} {amount} {self.remarks}'

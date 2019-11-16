@@ -16,14 +16,14 @@ from funds.tests import FUND_SAMPLES
 GENRE_SAMPLES = {
     # First key digit is equal to user id
 
-    11: {'user': {'id': 1}, 'fund': {'key': 11}, 'code': '1', 'name': 'INCOME',
-        'is_income': True},  # noqa: E127
-    12: {'user': {'id': 1}, 'fund': {'key': 11}, 'code': '2', 'name': 'EXPENSES',
-        'is_income': False},  # noqa: E127
+    11: {'user': {'id': 1}, 'fund': {'key': 11}, 'code': '1', 'name': 'INCOMING',
+        'is_incoming': True},  # noqa: E127
+    12: {'user': {'id': 1}, 'fund': {'key': 11}, 'code': '2', 'name': 'OUTGOING',
+        'is_incoming': False},  # noqa: E127
     21: {'user': {'id': 2}, 'fund': {'key': 21}, 'code': 'ES', 'name': 'ESODA',
-        'is_income': True},  # noqa: E127
+        'is_incoming': True},  # noqa: E127
     22: {'user': {'id': 2}, 'fund': {'key': 21}, 'code': 'EX', 'name': 'EXODA',
-        'is_income': False},  # noqa: E127
+        'is_incoming': False},  # noqa: E127
 }
 
 

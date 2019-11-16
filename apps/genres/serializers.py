@@ -26,7 +26,7 @@ class GenreSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Genre
-        fields = ('id', 'user', 'code', 'name', 'is_income', 'fund', 'url')
+        fields = ('id', 'user', 'code', 'name', 'is_incoming', 'fund', 'url')
 
         # extra_kwargs = error_messages
 
