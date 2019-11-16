@@ -10,7 +10,7 @@ from users.tests import UserCreateMethods
 from users.tests import USER_SAMPLES, ADMIN_SAMPLES
 
 FUND_SAMPLES = {
-    # First key digit is equal to user id
+    # First dict key digit is equal to user dict key
 
     11: {'user': {'id': 1}, 'code': '1', 'name': 'CASH'},
     12: {'user': {'id': 1}, 'code': '2', 'name': 'VISA'},
@@ -22,15 +22,16 @@ FUND_SAMPLES = {
 
 class FundCreateMethods:
 
-    def create_fund(self, **fund):
-        fund['user'] = get_user_model().objects.get(pk=fund['user']['id'])
+    def create_fund(self, **sample):
+        sample['user'] = get_user_model().objects.get(pk=sample['user']['id'])
+        fund = Fund.objects.create(**sample)
 
-        return Fund.objects.create(**fund)
-
+        return fund
 
     def create_funds(self, samples):
-        for fund in samples.values():
-            self.create_fund(**fund)
+        for sample in samples.values():
+            fund = self.create_fund(**sample)
+            sample['id'] = fund.pk
 
 
 class FundsTests(TestCase, FundCreateMethods, UserCreateMethods):

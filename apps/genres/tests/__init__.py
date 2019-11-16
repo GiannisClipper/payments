@@ -16,14 +16,14 @@ from funds.tests import FUND_SAMPLES
 GENRE_SAMPLES = {
     # First key digit is equal to user id
 
-    11: {'user': {'id': 1}, 'fund': {'id': 1}, 'code': '1', 'name': 'INCOME',
-            'is_income': True},
-    12: {'user': {'id': 1}, 'fund': {'id': 1}, 'code': '2', 'name': 'EXPENSES',
-            'is_income': False},
-    21: {'user': {'id': 2}, 'fund': {'id': 1}, 'code': 'ES', 'name': 'ESODA',
-            'is_income': True},
-    22: {'user': {'id': 2}, 'fund': {'id': 1}, 'code': 'EX', 'name': 'EXODA',
-            'is_income': False},
+    11: {'user': {'id': 1}, 'fund': {'key': 11}, 'code': '1', 'name': 'INCOME',
+        'is_income': True},  # noqa: E127
+    12: {'user': {'id': 1}, 'fund': {'key': 11}, 'code': '2', 'name': 'EXPENSES',
+        'is_income': False},  # noqa: E127
+    21: {'user': {'id': 2}, 'fund': {'key': 21}, 'code': 'ES', 'name': 'ESODA',
+        'is_income': True},  # noqa: E127
+    22: {'user': {'id': 2}, 'fund': {'key': 21}, 'code': 'EX', 'name': 'EXODA',
+        'is_income': False},  # noqa: E127
 }
 
 
@@ -36,8 +36,9 @@ class GenreCreateMethods:
         return Genre.objects.create(**genre)
 
     def create_genres(self, samples):
-        for genre in samples.values():
-            self.create_genre(**genre)
+        for sample in samples.values():
+            genre = self.create_genre(**sample)
+            sample['id'] = genre.pk
 
 
 class GenresTests(TestCase, GenreCreateMethods, UserCreateMethods, FundCreateMethods):
@@ -54,3 +55,8 @@ class GenresTests(TestCase, GenreCreateMethods, UserCreateMethods, FundCreateMet
         self.create_users(self.samples['users'])
         self.create_admins(self.samples['admins'])
         self.create_funds(self.samples['funds'])
+
+        for sample in self.samples['genres'].values():
+            key = sample['fund']['key']
+            sample['fund']['id'] = self.samples['funds'][key]['id']
+            sample['fund'].pop('key', None)

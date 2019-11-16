@@ -35,7 +35,7 @@ class AdminPost(AdminPrivateGenresAPITests):
 
     def test_when_invalid_fund_user(self):
         sample = self.samples['genres'][11]
-        sample['fund']['id'] = self.samples['funds'][21].id
+        sample['fund']['id'] = self.samples['funds'][21]['id']
         res = self.api_request(ROOT_URL, self.METHOD, payload=sample, token=self.token)
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)

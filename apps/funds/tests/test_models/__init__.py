@@ -105,8 +105,8 @@ class FundModelValidationOnCreateTests(FundModelTests):
     def test_same_values_to_other_users(self):
         fund_ = self.samples['funds'][11]
         fund1 = self.create_fund(**fund_)
-
         fund_['user']['id'] = 2
+
         fund2 = self.create_fund(**fund_)
 
         self.assertNotEqual(fund1.user, fund2.user)
@@ -155,8 +155,8 @@ class FundModelValidationOnUpdateTests(FundModelTests):
         fund1 = self.create_fund(**fund_)
         fund_ = self.samples['funds'][12]
         fund2 = self.create_fund(**fund_)
-
         fund_['user'] = get_user_model().objects.get(pk=2)
+
         fund1.update(**fund_)
 
         self.assertNotEqual(fund1.user, fund2.user)
