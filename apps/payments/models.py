@@ -13,41 +13,31 @@ class Payment(CustomBaseModel):
         get_user_model(),
         on_delete=models.CASCADE,
         null=False,
-        blank=False,
     )
 
     date = models.DateField(
         db_index=True,
         null=False,
-        blank=False,
     )
 
     genre = models.ForeignKey(
         Genre,
         on_delete=models.CASCADE,
         null=False,
-        blank=False,
     )
 
-    incoming = models.DecimalField(
-        max_digits=9,
-        decimal_places=2,
+    incoming = models.FloatField(
         null=True,
-        blank=True,
     )
 
-    outgoing = models.DecimalField(
-        max_digits=9,
-        decimal_places=2,
+    outgoing = models.FloatField(
         null=True,
-        blank=True,
     )
 
     fund = models.ForeignKey(
         Fund,
         on_delete=models.CASCADE,
         null=False,
-        blank=False,
     )
 
     remarks = models.CharField(
@@ -59,8 +49,8 @@ class Payment(CustomBaseModel):
     class Meta:
         constraints = (
             models.UniqueConstraint(
-                # Unique constraint does not work properly with null values so we convert 
-                # incoming/outgoing None's to zeroes as well as remarks None to blank
+                # Unique constraint does not work properly with null values so we need
+                # to convert incoming/outgoing None to 0 as well as remarks None to ''
                 fields=('user', 'date', 'genre', 'incoming', 'outgoing', 'fund', 'remarks'),
                 name='unique_payment'
             ),
@@ -70,9 +60,9 @@ class Payment(CustomBaseModel):
             ('user', 'date'),
         )
 
-    def clean(self):
-        # Unique constraint does not work properly with null values so we convert 
-        # incoming/outgoing None's to zeroes as well as remarks None to blank
+    def full_clean(self):
+        # Unique constraint does not work properly with null values so we need
+        # to convert incoming/outgoing None to 0 as well as remarks None to ''
         value = getattr(self, 'incoming')
         if value == None:
             setattr(self, 'incoming', 0)
@@ -85,7 +75,7 @@ class Payment(CustomBaseModel):
         if value == None:
             setattr(self, 'remarks', '')
 
-        super().clean()
+        super().full_clean()
 
     def __str__(self):
         amount = self.incoming if self.genre.is_incoming else self.outgoing

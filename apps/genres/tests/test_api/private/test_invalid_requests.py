@@ -40,6 +40,7 @@ class AdminPost(AdminPrivateGenresAPITests):
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('errors', res.data)
+        self.assertIn('fund', res.data['errors'])
         self.assertEqual(res.data['token'], self.token)
 
 

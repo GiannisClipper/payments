@@ -6,8 +6,14 @@ class CustomBaseModel(models.Model):
 
     class Meta:
         abstract=True
-    
-    def full_clean(self):
+
+    # There are three steps involved in validating a model:
+    # Validate the model fields - Model.clean_fields()
+    # Validate the model as a whole - Model.clean()
+    # Validate the field uniqueness - Model.validate_unique()
+    # All three steps are performed when you call full_clean() method.
+
+    def clean_fields(self, *args, **kwargs):
         # Remove leading or trailing spaces from strings
         for field in self._meta.fields:
             if isinstance(field, (models.CharField, models.TextField)):
@@ -15,10 +21,10 @@ class CustomBaseModel(models.Model):
                 if value != None:
                     setattr(self, field.name, value.strip())
 
-        super().full_clean()
+        super().clean_fields(*args, **kwargs)
 
     def save(self, *args, **kwargs):
-        # Fields validations run here
+        # Validations are performed here
         self.full_clean()
 
         super().save(*args, **kwargs)

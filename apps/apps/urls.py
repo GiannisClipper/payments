@@ -38,6 +38,7 @@ urlpatterns = [
     path('users/', include('users.urls', namespace='users')),
     path('funds/', include('funds.urls', namespace='funds')),
     path('genres/', include('genres.urls', namespace='genres')),
+    path('payments/', include('payments.urls', namespace='payments')),
 
     # path('debug/', debug),
 ]

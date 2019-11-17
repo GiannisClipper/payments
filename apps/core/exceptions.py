@@ -16,7 +16,7 @@ def core_exception_handler(exc, context):
 
     exception_class = exc.__class__.__name__
 
-    if exception_class in handlers:
+    if response and exception_class in handlers:
         return handlers[exception_class](exc, context, response)
 
     return response

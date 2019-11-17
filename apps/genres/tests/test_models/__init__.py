@@ -112,11 +112,25 @@ class GenreModelValidationOnCreateTests(GenreModelTests):
         self.assertIn('__all__', errors)
         self.assertEqual(2, len(errors['__all__']))
 
+    #def test_invalid_fund_error(self):
+    #    errors = ''
+    #    genre_ = self.samples['genres'][11]
+    #    genre_['fund']['id'] = self.samples['funds'][21]['id']
+
+    #    try:
+    #        self.create_genre(**genre_)
+    #    except ValidationError as err:
+    #        errors = dict(err)
+
+    #    self.assertIn('fund', errors)
+
     def test_same_values_to_other_users(self):
         genre_ = self.samples['genres'][11]
         genre1 = self.create_genre(**genre_)
 
-        genre_['user']['id'] = 2
+        genre_ = self.samples['genres'][21]
+        genre_['code'] = genre1.code
+        genre_['name'] = genre1.name
         genre2 = self.create_genre(**genre_)
 
         self.assertNotEqual(genre1.user, genre2.user)
@@ -163,16 +177,18 @@ class GenreModelValidationOnUpdateTests(GenreModelTests):
         self.assertIn('__all__', errors)
         self.assertEqual(2, len(errors['__all__']))
 
-    def test_same_values_to_other_users(self):
-        genre_ = self.samples['genres'][11]
-        genre1 = self.create_genre(**genre_)
-        genre_ = self.samples['genres'][12]
-        genre2 = self.create_genre(**genre_)
-        genre_['user'] = get_user_model().objects.get(pk=2)
-        genre_.pop('fund', None)
+    #def test_invalid_fund_error(self):
+    #    errors = ''
+    #    genre_ = self.samples['genres'][11]
+    #    genre1 = self.create_genre(**genre_)
+    #    genre_ = self.samples['genres'][21]
+    #    genre2 = self.create_genre(**genre_)
+    #    genre_.pop('user', None)
+    #    genre_['fund'] = genre1.fund
 
-        genre1.update(**genre_)
+    #    try:
+    #        genre2.update(**genre_)
+    #    except ValidationError as err:
+    #        errors = dict(err)
 
-        self.assertNotEqual(genre1.user, genre2.user)
-        self.assertEqual(genre1.code, genre2.code)
-        self.assertEqual(genre1.name, genre2.name)
+    #    self.assertIn('fund', errors)
