@@ -36,9 +36,12 @@ class PaymentModelBasicTests(PaymentModelTests):
         self.assertEqual(payment1.date,
             datetime.datetime.strptime(payment_['date'], "%Y-%m-%d").date())
         self.assertEqual(payment1.genre.id, payment_['genre']['id'])
+        payment_['incoming'] = payment_['incoming'] if payment_['incoming'] else 0
+        payment_['outgoing'] = payment_['outgoing'] if payment_['outgoing'] else 0
         self.assertEqual(payment1.incoming, payment_['incoming'])
         self.assertEqual(payment1.outgoing, payment_['outgoing'])
         self.assertEqual(payment1.fund.id, payment_['fund']['id'])
+        payment_['remarks'] = payment_['remarks'] if payment_['remarks'] else ''
         self.assertEqual(payment1.remarks, payment_['remarks'])
 
     def test_update(self):
@@ -54,9 +57,12 @@ class PaymentModelBasicTests(PaymentModelTests):
         self.assertEqual(payment2.date,
             datetime.datetime.strptime(payment_['date'], "%Y-%m-%d").date())
         self.assertEqual(payment2.genre, payment_['genre'])
+        payment_['incoming'] = payment_['incoming'] if payment_['incoming'] else 0
+        payment_['outgoing'] = payment_['outgoing'] if payment_['outgoing'] else 0
         self.assertEqual(payment2.incoming, payment_['incoming'])
         self.assertEqual(payment2.outgoing, payment_['outgoing'])
         self.assertEqual(payment2.fund, payment_['fund'])
+        payment_['remarks'] = payment_['remarks'] if payment_['remarks'] else ''
         self.assertEqual(payment2.remarks, payment_['remarks'])
 
     def test_delete(self):
@@ -128,11 +134,10 @@ class PaymentModelValidationOnCreateTests(PaymentModelTests):
     def test_unique_errors(self):
         errors = ''
         payment_ = self.samples['payments'][11]
-        print(payment_)
+        payment_['remarks'] = None
         self.create_payment(**payment_)
 
         try:
-            print(payment_)
             self.create_payment(**payment_)
         except ValidationError as err:
             errors = dict(err)

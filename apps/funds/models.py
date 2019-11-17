@@ -1,9 +1,10 @@
 from django.db import models
-
 from django.contrib.auth import get_user_model
 
+from core.models import CustomBaseModel
 
-class Fund(models.Model):
+
+class Fund(CustomBaseModel):
     '''Model represents and stores funds.'''
 
     user = models.ForeignKey(
@@ -26,6 +27,17 @@ class Fund(models.Model):
     )
 
     class Meta:
+        #constraints = (
+        #    models.UniqueConstraint(
+        #        fields=('user', 'code'),
+        #        name='unique_code'
+        #    ),
+        #    models.UniqueConstraint(
+        #        fields=('user', 'name'),
+        #        name='unique_name'
+        #    ),
+        #)
+
         unique_together = (
             ('user', 'code'),
             ('user', 'name'),
@@ -35,30 +47,6 @@ class Fund(models.Model):
             ('user', 'code'),
             ('user', 'name'),
         )
-
-    def save(self, *args, **kwargs):
-
-        # Remove leading or trailing spaces from strings
-        for field in self._meta.fields:
-            if isinstance(field, (models.CharField, models.TextField)):
-                value = getattr(self, field.name)
-                if value:
-                    setattr(self, field.name, value.strip())
-
-        # Field validations run here
-        self.full_clean()
-
-        super().save(*args, **kwargs)
-
-    def update(self, **fields):
-        '''Updates and returns a fund.'''
-
-        for key, value in fields.items():
-            setattr(self, key, value)
-
-        self.save()
-
-        return self
 
     def __str__(self):
         return f'{self.name}'

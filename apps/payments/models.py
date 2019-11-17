@@ -1,12 +1,12 @@
 from django.db import models
-
 from django.contrib.auth import get_user_model
 
+from core.models import CustomBaseModel
 from funds.models import Fund
 from genres.models import Genre
 
 
-class Payment(models.Model):
+class Payment(CustomBaseModel):
     '''Model represents and stores payments.'''
 
     user = models.ForeignKey(
@@ -57,38 +57,35 @@ class Payment(models.Model):
     )
 
     class Meta:
-        unique_together = (
-            ('user', 'date', 'genre', 'incoming', 'outgoing', 'fund', 'remarks'),
-            # Seems that unique_together does not work properly with null values
+        constraints = (
+            models.UniqueConstraint(
+                # Unique constraint does not work properly with null values so we convert 
+                # incoming/outgoing None's to zeroes as well as remarks None to blank
+                fields=('user', 'date', 'genre', 'incoming', 'outgoing', 'fund', 'remarks'),
+                name='unique_payment'
+            ),
         )
 
         index_together = (
             ('user', 'date'),
         )
 
-    def save(self, *args, **kwargs):
+    def clean(self):
+        # Unique constraint does not work properly with null values so we convert 
+        # incoming/outgoing None's to zeroes as well as remarks None to blank
+        value = getattr(self, 'incoming')
+        if value == None:
+            setattr(self, 'incoming', 0)
 
-        # Remove leading or trailing spaces from strings
-        for field in self._meta.fields:
-            if isinstance(field, (models.CharField, models.TextField)):
-                value = getattr(self, field.name)
-                if value:
-                    setattr(self, field.name, value.strip())
+        value = getattr(self, 'outgoing')
+        if value == None:
+            setattr(self, 'outgoing', 0)
 
-        # Field validations run here
-        self.full_clean()
+        value = getattr(self, 'remarks')
+        if value == None:
+            setattr(self, 'remarks', '')
 
-        super().save(*args, **kwargs)
-
-    def update(self, **fields):
-        '''Updates and returns a genre.'''
-
-        for key, value in fields.items():
-            setattr(self, key, value)
-
-        self.save()
-
-        return self
+        super().clean()
 
     def __str__(self):
         amount = self.incoming if self.genre.is_incoming else self.outgoing
