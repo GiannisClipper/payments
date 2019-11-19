@@ -31,6 +31,11 @@ class PaymentSerializer(serializers.HyperlinkedModelSerializer):
         model = Payment
         fields = ('id', 'user', 'date', 'genre', 'incoming', 'outgoing', 'fund', 'remarks', 'url')
 
+        extra_kwargs = {
+            'incoming': {'required': False},
+            'outgoing': {'required': False},
+            'remarks': {'required': False}
+        } 
         # extra_kwargs = error_messages
 
     def validate(self, data):

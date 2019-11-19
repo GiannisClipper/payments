@@ -40,16 +40,16 @@ class Genre(CustomBaseModel):
     )
 
     class Meta:
-        #constraints = (
-        #    models.UniqueConstraint(
-        #        fields=('user', 'code'),
-        #        name='unique_code'
-        #    ),
-        #    models.UniqueConstraint(
-        #        fields=('user', 'name'),
-        #        name='unique_name'
-        #    ),
-        #)
+        # constraints = (
+        #     models.UniqueConstraint(
+        #         fields=('user', 'code'),
+        #         name='unique_code'
+        #     ),
+        #     models.UniqueConstraint(
+        #         fields=('user', 'name'),
+        #         name='unique_name'
+        #     ),
+        # )
 
         unique_together = (
             ('user', 'code'),

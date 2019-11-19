@@ -11,11 +11,7 @@ class AdminRequests(AdminPrivatePaymentsAPITests):
 
     # Signed admin has id > 1 other than owner's id in samples (funds, genres, payments)
 
-    def test_post(self):
-        sample = self.samples['payments'][11]
-        res = self.api_request(ROOT_URL, 'POST', payload=sample, token=self.token)
-
-        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+    def assert_data(self, res, sample):
         self.assertIn('payment', res.data)
         self.assertEqual(res.data['payment']['user']['id'], sample['user']['id'])
         self.assertEqual(res.data['payment']['date'], sample['date'])
@@ -30,49 +26,41 @@ class AdminRequests(AdminPrivatePaymentsAPITests):
         self.assertIn(f"/payments/{res.data['payment']['id']}/", res.data['payment']['url'])
         self.assertEqual(res.data['token'], self.token)
 
-    @skip('')
+    def test_post(self):
+        sample = self.samples['payments'][11]
+        res = self.api_request(ROOT_URL, 'POST', payload=sample, token=self.token)
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        self.assert_data(res, sample)
+
     def test_get(self):
-        sample = self.samples['genres'][11]
-        self.create_genre(**sample)
+        sample = self.samples['payments'][11]
+        self.create_payment(**sample)
 
         res = self.api_request(BY_ID_1_URL, 'GET', token=self.token)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertIn('genre', res.data)
-        self.assertEqual(res.data['genre']['user']['id'], sample['user']['id'])
-        self.assertEqual(res.data['genre']['code'], sample['code'])
-        self.assertEqual(res.data['genre']['name'], sample['name'])
-        self.assertEqual(res.data['genre']['is_income'], sample['is_income'])
-        self.assertEqual(res.data['genre']['fund']['id'], sample['fund']['id'])
-        self.assertIn(f"/genres/{res.data['genre']['id']}/", res.data['genre']['url'])
-        self.assertEqual(res.data['token'], self.token)
+        self.assert_data(res, sample)
 
-    @skip('')
     def test_patch(self):
-        sample = self.samples['genres'][11]
-        self.create_genre(**sample)
-        sample = self.samples['genres'][12]
+        sample = self.samples['payments'][11]
+        self.create_payment(**sample)
+        sample = self.samples['payments'][12]
 
         res = self.api_request(BY_ID_1_URL, 'PATCH', payload=sample, token=self.token)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertIn('genre', res.data)
-        self.assertEqual(res.data['genre']['code'], sample['code'])
-        self.assertEqual(res.data['genre']['name'], sample['name'])
-        self.assertEqual(res.data['genre']['is_income'], sample['is_income'])
-        self.assertEqual(res.data['genre']['fund']['id'], sample['fund']['id'])
-        self.assertEqual(res.data['token'], self.token)
+        self.assert_data(res, sample)
 
-    @skip('')
     def test_delete(self):
-        sample = self.samples['genres'][11]
-        self.create_genre(**sample)
+        sample = self.samples['payments'][11]
+        self.create_payment(**sample)
 
         res = self.api_request(BY_ID_1_URL, 'DELETE', token=self.token)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertIn('genre', res.data)
-        self.assertEqual(res.data['genre'], {})
+        self.assertIn('payment', res.data)
+        self.assertEqual(res.data['payment'], {})
         self.assertEqual(res.data['token'], self.token)
 
 
@@ -85,50 +73,46 @@ class OwnerRequest(OwnerPrivatePaymentsAPITests, AdminRequests):
 class AdminGetList(AdminPrivatePaymentsAPITests):
     '''Test admin's list requests to payments API.'''
 
-    @skip('')
     def setUp(self):
         super().setUp()
-        self.create_genres(self.samples['genres'])
+        self.create_payments(self.samples['payments'])
 
-    @skip('')
     def test_get_list(self):
         res = self.api_request(LIST_URL, 'GET', token=self.token)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertIn('genres', res.data)
-        self.assertEqual(len(res.data['genres']), len(self.samples['genres']))
+        self.assertIn('payments', res.data)
+        self.assertEqual(len(res.data['payments']), len(self.samples['payments']))
         self.assertEqual(res.data['token'], self.token)
 
-    @skip('')
     def test_get_list_passing_other_user_id(self):
         res = self.api_request(LIST_URL + '?user_id=1', 'GET', token=self.token)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertIn('genres', res.data)
+        self.assertIn('payments', res.data)
+        self.assertTrue(len(res.data['payments']) > 0)
         self.assertEqual(res.data['token'], self.token)
 
 
 class OwnerGetList(OwnerPrivatePaymentsAPITests):
     '''Test owner's list requests to payments API.'''
 
-    @skip('')
     def setUp(self):
         super().setUp()
-        self.create_genres(self.samples['genres'])
+        self.create_payments(self.samples['payments'])
 
-    @skip('')
     def test_get_list(self):
         res = self.api_request(LIST_URL, 'GET', token=self.token)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertIn('genres', res.data)
-        self.assertNotEqual(len(res.data['genres']), len(self.samples['genres']))
+        self.assertIn('payments', res.data)
+        self.assertNotEqual(len(res.data['payments']), len(self.samples['payments']))
         self.assertEqual(res.data['token'], self.token)
 
-    @skip('')
     def test_get_list_passing_self_user_id(self):
         res = self.api_request(LIST_URL + '?user_id=1', 'GET', token=self.token)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertIn('genres', res.data)
+        self.assertIn('payments', res.data)
+        self.assertTrue(len(res.data['payments']) > 0)
         self.assertEqual(res.data['token'], self.token)

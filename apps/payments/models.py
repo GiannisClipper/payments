@@ -18,6 +18,7 @@ class Payment(CustomBaseModel):
     date = models.DateField(
         db_index=True,
         null=False,
+        
     )
 
     genre = models.ForeignKey(
@@ -47,13 +48,20 @@ class Payment(CustomBaseModel):
     )
 
     class Meta:
-        constraints = (
-            models.UniqueConstraint(
-                # Unique constraint does not work properly with null values so we need
-                # to convert incoming/outgoing None to 0 as well as remarks None to ''
-                fields=('user', 'date', 'genre', 'incoming', 'outgoing', 'fund', 'remarks'),
-                name='unique_payment'
-            ),
+        # problem: exception handler gets raised errors without `response` object
+        #          so we use `unique_together` in place of `constraints`
+        #
+        # constraints = (
+        #     models.UniqueConstraint(
+        #         fields=('user', 'date', 'genre', 'incoming', 'outgoing', 'fund', 'remarks'),
+        #         name='unique_payment'
+        #     ),
+        # )
+
+        unique_together = (
+            # Unique constraint does not work properly with null values so we need
+            # to convert incoming/outgoing None to 0 as well as remarks None to ''
+            ('user', 'date', 'genre', 'incoming', 'outgoing', 'fund', 'remarks'),
         )
 
         index_together = (
@@ -63,6 +71,7 @@ class Payment(CustomBaseModel):
     def full_clean(self):
         # Unique constraint does not work properly with null values so we need
         # to convert incoming/outgoing None to 0 as well as remarks None to ''
+
         value = getattr(self, 'incoming')
         if value == None:
             setattr(self, 'incoming', 0)

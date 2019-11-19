@@ -145,71 +145,49 @@ class PaymentModelValidationOnCreateTests(PaymentModelTests):
         self.assertIn('__all__', errors)
         self.assertEqual(1, len(errors['__all__']))
 
-    @skip('')
-    def test_same_values_to_other_users(self):
-        genre_ = self.samples['genres'][11]
-        genre1 = self.create_genre(**genre_)
-
-        genre_['user']['id'] = 2
-        genre2 = self.create_genre(**genre_)
-
-        self.assertNotEqual(genre1.user, genre2.user)
-        self.assertEqual(genre1.code, genre2.code)
-        self.assertEqual(genre1.name, genre2.name)
-
 
 class PaymentModelValidationOnUpdateTests(PaymentModelTests):
 
-    @skip('')
     def test_required_errors_by_passing_empty_values(self):
         errors = ''
-        genre_ = self.samples['genres'][11]
-        genre1 = self.create_genre(**genre_)
-        genre_['user'] = None
-        genre_['code'] = '        '
-        genre_['name'] = '        '
-        genre_['fund'] = None
+        payment_ = self.samples['payments'][11]
+        payment1 = self.create_payment(**payment_)
+        payment_['user'] = None
+        payment_['date'] = '        '
+        payment_['genre'] = None
+        payment_['incoming'] = 0
+        payment_['outgoing'] = 0
+        payment_['fund'] = None
+        payment_['remarks'] = '        '
 
         try:
-            genre1.update(**genre_)
+            payment1.update(**payment_)
         except ValidationError as err:
             errors = dict(err)
 
         self.assertIn('user', errors.keys())
-        self.assertIn('code', errors.keys())
-        self.assertIn('name', errors.keys())
-        self.assertNotIn('fund', errors.keys())
+        self.assertIn('date', errors.keys())
+        self.assertIn('genre', errors.keys())
+        self.assertNotIn('incoming', errors.keys())
+        self.assertNotIn('outgoing', errors.keys())
+        self.assertIn('fund', errors.keys())
+        self.assertNotIn('remarks', errors.keys())
 
-    @skip('')
     def test_unique_errors(self):
         errors = ''
-        genre_ = self.samples['genres'][11]
-        self.create_genre(**genre_)
-        genre_ = self.samples['genres'][12]
-        genre2 = self.create_genre(**genre_)
-        genre_ = self.samples['genres'][11]
-        genre_.pop('user', None)
-        genre_.pop('fund', None)
+        payment_ = self.samples['payments'][11]
+        payment1 = self.create_payment(**payment_)
+        payment_ = self.samples['payments'][12]
+        payment2 = self.create_payment(**payment_)
+        payment_ = self.samples['payments'][11]
+        payment_.pop('user', None)
+        payment_['genre'] = payment1.genre
+        payment_['fund'] = payment1.fund
 
         try:
-            genre2.update(**genre_)
+            payment2.update(**payment_)
         except ValidationError as err:
             errors = dict(err)
 
         self.assertIn('__all__', errors)
-        self.assertEqual(2, len(errors['__all__']))
-
-    @skip('')
-    def test_same_values_to_other_users(self):
-        genre_ = self.samples['genres'][11]
-        genre1 = self.create_genre(**genre_)
-        genre_ = self.samples['genres'][12]
-        genre2 = self.create_genre(**genre_)
-        genre_['user'] = get_user_model().objects.get(pk=2)
-        genre_.pop('fund', None)
-
-        genre1.update(**genre_)
-
-        self.assertNotEqual(genre1.user, genre2.user)
-        self.assertEqual(genre1.code, genre2.code)
-        self.assertEqual(genre1.name, genre2.name)
+        self.assertEqual(1, len(errors['__all__']))
