@@ -1,5 +1,5 @@
 from django.db import models
-from django.core.exceptions import ValidationError
+# from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
 
 from core.models import CustomBaseModel
@@ -61,12 +61,12 @@ class Genre(CustomBaseModel):
             ('user', 'name'),
         )
 
-    #def full_clean(self):
+    # def full_clean(self):
 
-    #    super().full_clean()
+    #     super().full_clean()
 
-    #    if self.fund and self.fund.user.pk != self.user.pk:
-    #        raise ValidationError({'fund': 'Not a valid fund!!'})
+    #     if self.fund and self.fund.user.pk != self.user.pk:
+    #         raise ValidationError({'fund': 'Not a valid fund!!'})
 
     def __str__(self):
         return f'{self.name}'

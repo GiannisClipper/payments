@@ -61,7 +61,7 @@ class PaymentByIdAPIView(RetrieveUpdateDestroyAPIView):
         data = request.data.get('payment', {})
 
         if 'user' not in data:
-            data['user'] = {'id': payment.user.pk}  # to validate payment.user == genre/fund.user
+            data['user'] = {'id': payment.user.pk}  # to validate payment.user==genre/fund.user
 
         serializer = self.serializer_class(
             payment,

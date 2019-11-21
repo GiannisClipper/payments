@@ -18,7 +18,7 @@ class Payment(CustomBaseModel):
     date = models.DateField(
         db_index=True,
         null=False,
-        
+
     )
 
     genre = models.ForeignKey(
@@ -73,15 +73,15 @@ class Payment(CustomBaseModel):
         # to convert incoming/outgoing None to 0 as well as remarks None to ''
 
         value = getattr(self, 'incoming')
-        if value == None:
+        if value is None:
             setattr(self, 'incoming', 0)
 
         value = getattr(self, 'outgoing')
-        if value == None:
+        if value is None:
             setattr(self, 'outgoing', 0)
 
         value = getattr(self, 'remarks')
-        if value == None:
+        if value is None:
             setattr(self, 'remarks', '')
 
         super().full_clean()

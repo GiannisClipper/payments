@@ -5,7 +5,7 @@ class CustomBaseModel(models.Model):
     '''A base model customization.'''
 
     class Meta:
-        abstract=True
+        abstract = True
 
     # There are three steps involved in validating a model:
     # Validate the model fields - Model.clean_fields()
@@ -18,7 +18,7 @@ class CustomBaseModel(models.Model):
         for field in self._meta.fields:
             if isinstance(field, (models.CharField, models.TextField)):
                 value = getattr(self, field.name)
-                if value != None:
+                if value is not None:
                     setattr(self, field.name, value.strip())
 
         super().clean_fields(*args, **kwargs)

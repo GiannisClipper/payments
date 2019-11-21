@@ -2,8 +2,6 @@ from unittest import skip  # noqa: F401
 from django.core.exceptions import ValidationError
 import datetime
 
-from django.contrib.auth import get_user_model
-
 from funds.models import Fund
 from genres.models import Genre
 from payments.models import Payment
@@ -33,8 +31,9 @@ class PaymentModelBasicTests(PaymentModelTests):
         payment1 = self.create_payment(**payment_)
 
         self.assertEqual(payment1.user.id, payment_['user']['id'])
-        self.assertEqual(payment1.date,
-            datetime.datetime.strptime(payment_['date'], "%Y-%m-%d").date())
+        self.assertEqual(
+            payment1.date, datetime.datetime.strptime(payment_['date'], "%Y-%m-%d").date()
+        )
         self.assertEqual(payment1.genre.id, payment_['genre']['id'])
         payment_['incoming'] = payment_['incoming'] if payment_['incoming'] else 0
         payment_['outgoing'] = payment_['outgoing'] if payment_['outgoing'] else 0
@@ -54,8 +53,9 @@ class PaymentModelBasicTests(PaymentModelTests):
         payment2 = payment1.update(**payment_)
 
         self.assertEqual(payment2, payment1)
-        self.assertEqual(payment2.date,
-            datetime.datetime.strptime(payment_['date'], "%Y-%m-%d").date())
+        self.assertEqual(
+            payment2.date, datetime.datetime.strptime(payment_['date'], "%Y-%m-%d").date()
+        )
         self.assertEqual(payment2.genre, payment_['genre'])
         payment_['incoming'] = payment_['incoming'] if payment_['incoming'] else 0
         payment_['outgoing'] = payment_['outgoing'] if payment_['outgoing'] else 0
@@ -78,8 +78,9 @@ class PaymentModelBasicTests(PaymentModelTests):
         payment1 = self.create_payment(**payment_)
         amount = payment1.incoming if payment1.genre.is_incoming else payment1.outgoing
 
-        self.assertEqual(str(payment1),
-            f'{payment1.genre.name} {payment1.date} {amount} {payment1.remarks}')
+        self.assertEqual(
+            str(payment1), f'{payment1.genre.name} {payment1.date} {amount} {payment1.remarks}'
+        )
 
 
 class PaymentModelValidationOnCreateTests(PaymentModelTests):

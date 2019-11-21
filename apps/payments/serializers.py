@@ -29,21 +29,27 @@ class PaymentSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Payment
-        fields = ('id', 'user', 'date', 'genre', 'incoming', 'outgoing', 'fund', 'remarks', 'url')
+        fields = (
+            'id', 'user', 'date', 'genre', 'incoming', 'outgoing', 'fund', 'remarks', 'url'
+        )
 
         extra_kwargs = {
             'incoming': {'required': False},
             'outgoing': {'required': False},
             'remarks': {'required': False}
-        } 
+        }
         # extra_kwargs = error_messages
 
     def validate(self, data):
+        errors = {}
         if data.get('genre', None) and data['genre'].user.pk != data['user'].pk:
-            raise serializers.ValidationError({'genre': 'Not a valid genre.'})
+            errors['genre'] = 'Not a valid genre.'
 
         if data.get('fund', None) and data['fund'].user.pk != data['user'].pk:
-            raise serializers.ValidationError({'fund': 'Not a valid fund.'})
+            errors['fund'] = 'Not a valid fund.'
+
+        if errors:
+            raise serializers.ValidationError(errors)
 
         return data
 

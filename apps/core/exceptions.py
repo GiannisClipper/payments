@@ -18,9 +18,10 @@ def core_exception_handler(exc, context):
 
     exception_class = exc.__class__.__name__
 
-    if not response and exception_class == 'ValidationError':
-        response = Response(exc.message_dict, status=status.HTTP_400_BAD_REQUEST)
-        #print(exc.error_dict, exc.message_dict, exc.messages)
+    if not response:
+        if exception_class == 'ValidationError':
+            response = Response(exc.message_dict, status=status.HTTP_400_BAD_REQUEST)
+            # print(exc.error_dict, exc.message_dict, exc.messages)
 
     if response and exception_class in handlers:
         return handlers[exception_class](exc, context, response)
