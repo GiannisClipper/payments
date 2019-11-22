@@ -17,6 +17,8 @@ def core_exception_handler(exc, context):
     # Identify the type of the current exception and check
     # if it should be handled here or by the default handler
 
+    print(exc.get_full_details())
+
     exception_class = exc.__class__.__name__
 
     if not response:
@@ -26,6 +28,7 @@ def core_exception_handler(exc, context):
 
         elif exception_class in ('IntegrityError',):
             response = Response(exc.args[0], status=status.HTTP_400_BAD_REQUEST)
+            # print(exc.args)
 
     if response and exception_class in handlers:
         return handlers[exception_class](exc, context, response)

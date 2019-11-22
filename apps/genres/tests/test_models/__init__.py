@@ -1,5 +1,6 @@
 from unittest import skip  # noqa: F401
 from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 
 from funds.models import Fund
 from genres.models import Genre
@@ -10,6 +11,9 @@ from genres.constants import (
     USER_REQUIRED,
     CODE_REQUIRED,
     NAME_REQUIRED,
+    CODE_EXISTS,
+    NAME_EXISTS,
+    FUND_INVALID,
 )
 
 
@@ -122,17 +126,19 @@ class GenreModelValidationOnCreateTests(GenreModelTests):
         self.assertIn('__all__', errors)
         self.assertEqual(2, len(errors['__all__']))
 
-    # def test_invalid_fund_error(self):
-    #     errors = ''
-    #     genre_ = self.samples['genres'][11]
-    #     genre_['fund']['id'] = self.samples['funds'][21]['id']
+    def test_invalid_fund_error(self):
+        errors = ''
+        genre_ = self.samples['genres'][11]
+        genre_['fund']['id'] = self.samples['funds'][21]['id']
 
-    #     try:
-    #         self.create_genre(**genre_)
-    #     except ValidationError as err:
-    #         errors = dict(err)
+        try:
+            self.create_genre(**genre_)
+        except IntegrityError as err:
+            errors = err.args[0]
 
-    #     self.assertIn('fund', errors)
+        self.assertIn('fund', errors.keys())
+        self.assertIn(FUND_INVALID, errors['fund'])
+        self.assertEqual(1, len(errors))
 
     def test_same_values_to_other_users(self):
         genre_ = self.samples['genres'][11]
@@ -165,9 +171,12 @@ class GenreModelValidationOnUpdateTests(GenreModelTests):
             errors = dict(err)
 
         self.assertIn('user', errors.keys())
+        self.assertIn(USER_REQUIRED, errors['user'])
         self.assertIn('code', errors.keys())
+        self.assertIn(CODE_REQUIRED, errors['code'])
         self.assertIn('name', errors.keys())
-        self.assertNotIn('fund', errors.keys())
+        self.assertIn(NAME_REQUIRED, errors['name'])
+        self.assertEqual(3, len(errors))
 
     def test_unique_errors(self):
         errors = ''
@@ -187,18 +196,20 @@ class GenreModelValidationOnUpdateTests(GenreModelTests):
         self.assertIn('__all__', errors)
         self.assertEqual(2, len(errors['__all__']))
 
-    # def test_invalid_fund_error(self):
-    #     errors = ''
-    #     genre_ = self.samples['genres'][11]
-    #     genre1 = self.create_genre(**genre_)
-    #     genre_ = self.samples['genres'][21]
-    #     genre2 = self.create_genre(**genre_)
-    #     genre_.pop('user', None)
-    #     genre_['fund'] = genre1.fund
+    def test_invalid_fund_error(self):
+        errors = ''
+        genre_ = self.samples['genres'][11]
+        genre1 = self.create_genre(**genre_)
+        genre_ = self.samples['genres'][21]
+        genre2 = self.create_genre(**genre_)
+        genre_.pop('user', None)
+        genre_['fund'] = genre1.fund
 
-    #     try:
-    #         genre2.update(**genre_)
-    #     except ValidationError as err:
-    #         errors = dict(err)
+        try:
+            genre2.update(**genre_)
+        except IntegrityError as err:
+            errors = err.args[0]
 
-    #     self.assertIn('fund', errors)
+        self.assertIn('fund', errors.keys())
+        self.assertIn(FUND_INVALID, errors['fund'])
+        self.assertEqual(1, len(errors))

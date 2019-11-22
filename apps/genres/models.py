@@ -9,6 +9,9 @@ from .constants import (
     USER_REQUIRED,
     CODE_REQUIRED,
     NAME_REQUIRED,
+    CODE_EXISTS,
+    NAME_EXISTS,
+    FUND_INVALID,
 )
 
 class Genre(CustomBaseModel):
@@ -81,6 +84,17 @@ class Genre(CustomBaseModel):
             ('user', 'name'),
         )
 
+    def unique_error_message(self, model_class, unique_check):
+
+        if model_class == type(self) and unique_check == ('user', 'code'):
+            return CODE_EXISTS
+
+        elif model_class == type(self) and unique_check == ('user', 'name'):
+            return NAME_EXISTS
+
+        else:
+            return super().unique_error_message(model_class, unique_check)
+
     def full_clean(self):
 
         super().full_clean()
@@ -88,7 +102,7 @@ class Genre(CustomBaseModel):
         # Check `user` integrity as the same owner of `genre` and `fund`
 
         if self.fund and self.fund.user.pk != self.user.pk:
-            raise IntegrityError({'fund': 'Not a valid fund!!'})
+            raise IntegrityError({'fund': FUND_INVALID})
 
     def __str__(self):
         return f'{self.name}'

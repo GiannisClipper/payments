@@ -5,6 +5,15 @@ from genres.tests.test_api import ROOT_URL, BY_ID_1_URL, LIST_URL
 
 from . import AdminPrivateGenresAPITests, OwnerPrivateGenresAPITests
 
+from genres.constants import (
+    USER_REQUIRED,
+    CODE_REQUIRED,
+    NAME_REQUIRED,
+    CODE_EXISTS,
+    NAME_EXISTS,
+    FUND_INVALID,
+)
+
 
 class AdminPost(AdminPrivateGenresAPITests):
     '''Test admin's invalid POST requests to funds API.'''
@@ -29,8 +38,13 @@ class AdminPost(AdminPrivateGenresAPITests):
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('errors', res.data)
         self.assertIn('user', res.data['errors'])
+        self.assertIn(USER_REQUIRED, res.data['errors']['user'])
         self.assertIn('code', res.data['errors'])
+        self.assertIn(CODE_REQUIRED, res.data['errors']['code'])
         self.assertIn('name', res.data['errors'])
+        self.assertIn(NAME_REQUIRED, res.data['errors']['name'])
+        self.assertEqual(3, len(res.data['errors']))
+
         self.assertEqual(res.data['token'], self.token)
 
     def test_when_invalid_fund_user(self):
@@ -41,6 +55,8 @@ class AdminPost(AdminPrivateGenresAPITests):
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('errors', res.data)
         self.assertIn('fund', res.data['errors'])
+        self.assertEqual(FUND_INVALID, res.data['errors']['fund'])
+        self.assertEqual(1, len(res.data['errors']))
         self.assertEqual(res.data['token'], self.token)
 
 
