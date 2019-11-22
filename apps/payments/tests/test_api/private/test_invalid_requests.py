@@ -104,7 +104,7 @@ class AdminPatch(AdminGet):
 
 
 class AdminDelete(AdminGet):
-    '''Test admin's invalid DELETE requests to funds API.'''
+    '''Test admin's invalid DELETE requests to payments API.'''
 
     METHOD = 'DELETE'
 
@@ -135,8 +135,7 @@ class OwnerGet(OwnerPrivatePaymentsAPITests, AdminGet):
     METHOD = 'GET'
 
     def test_unauthorized_request(self):
-        sample = self.samples['payments'][11]
-        sample['user']['id'] = self.user['id'] + 1  # not equal to id of signed user
+        sample = self.samples['payments'][21]  # not equal to id of signed user
         self.create_payment(**sample)
 
         res = self.api_request(BY_ID_1_URL, self.METHOD, token=self.token)
@@ -147,19 +146,19 @@ class OwnerGet(OwnerPrivatePaymentsAPITests, AdminGet):
 
 
 class OwnerPatch(OwnerGet, AdminPatch):
-    '''Test owner's invalid PATCH requests to funds API.'''
+    '''Test owner's invalid PATCH requests to payments API.'''
 
     METHOD = 'PATCH'
 
 
 class OwnerDelete(OwnerGet, AdminDelete):
-    '''Test owner's invalid DELETE requests to funds API.'''
+    '''Test owner's invalid DELETE requests to payments API.'''
 
     METHOD = 'DELETE'
 
 
 class AdminGetList(AdminPrivatePaymentsAPITests):
-    '''Test admin's invalid GET requests to funds API.'''
+    '''Test admin's invalid GET requests to payments API.'''
 
     METHOD = 'GET'
 
@@ -172,7 +171,7 @@ class AdminGetList(AdminPrivatePaymentsAPITests):
 
 
 class OwnerGetList(OwnerPrivatePaymentsAPITests):
-    '''Test owner's invalid list requests to funds API.'''
+    '''Test owner's invalid list requests to payments API.'''
 
     METHOD = 'GET'
 

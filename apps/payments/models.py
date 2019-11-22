@@ -1,4 +1,5 @@
 from django.db import models
+from django.db import IntegrityError
 from django.contrib.auth import get_user_model
 
 from core.models import CustomBaseModel
@@ -85,6 +86,20 @@ class Payment(CustomBaseModel):
             setattr(self, 'remarks', '')
 
         super().full_clean()
+
+        # Check `user` integrity as the same owner of `payment`, `genre` and `fund`
+
+        errors = {}
+
+        if self.genre and self.genre.user.pk != self.user.pk:
+            errors['genre'] = 'Not a valid genre.'
+
+        if self.fund and self.fund.user.pk != self.user.pk:
+            errors['fund'] = 'Not a valid fund.'
+
+        if errors:
+            raise IntegrityError(errors)
+
 
     def __str__(self):
         amount = self.incoming if self.genre.is_incoming else self.outgoing

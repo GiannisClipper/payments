@@ -120,8 +120,7 @@ class OwnerGet(OwnerPrivateGenresAPITests, AdminGet):
     METHOD = 'GET'
 
     def test_unauthorized_request(self):
-        sample = self.samples['genres'][11]
-        sample['user']['id'] = self.user['id'] + 1  # not equal to id of signed user
+        sample = self.samples['genres'][21]  # not equal to id of signed user
         self.create_genre(**sample)
 
         res = self.api_request(BY_ID_1_URL, self.METHOD, token=self.token)

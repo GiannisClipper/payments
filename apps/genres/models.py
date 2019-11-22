@@ -1,10 +1,15 @@
 from django.db import models
-# from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 from django.contrib.auth import get_user_model
 
 from core.models import CustomBaseModel
 from funds.models import Fund
 
+from .constants import (
+    USER_REQUIRED,
+    CODE_REQUIRED,
+    NAME_REQUIRED,
+)
 
 class Genre(CustomBaseModel):
     '''Model represents and stores genres.'''
@@ -14,18 +19,33 @@ class Genre(CustomBaseModel):
         on_delete=models.CASCADE,
         null=False,
         blank=False,
+        error_messages={
+            'required': USER_REQUIRED,
+            'null': USER_REQUIRED,
+            'blank': USER_REQUIRED,
+        }
     )
 
     code = models.CharField(
         max_length=8,
         null=False,
         blank=False,
+        error_messages={
+            'required': CODE_REQUIRED,
+            'null': CODE_REQUIRED,
+            'blank': CODE_REQUIRED,
+        }
     )
 
     name = models.CharField(
         max_length=128,
         null=False,
         blank=False,
+        error_messages={
+            'required': NAME_REQUIRED,
+            'null': NAME_REQUIRED,
+            'blank': NAME_REQUIRED,
+        }
     )
 
     is_incoming = models.BooleanField(
@@ -61,12 +81,14 @@ class Genre(CustomBaseModel):
             ('user', 'name'),
         )
 
-    # def full_clean(self):
+    def full_clean(self):
 
-    #     super().full_clean()
+        super().full_clean()
 
-    #     if self.fund and self.fund.user.pk != self.user.pk:
-    #         raise ValidationError({'fund': 'Not a valid fund!!'})
+        # Check `user` integrity as the same owner of `genre` and `fund`
+
+        if self.fund and self.fund.user.pk != self.user.pk:
+            raise IntegrityError({'fund': 'Not a valid fund!!'})
 
     def __str__(self):
         return f'{self.name}'

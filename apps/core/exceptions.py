@@ -6,9 +6,10 @@ from rest_framework import status
 def core_exception_handler(exc, context):
 
     handlers = {
-        'ValidationError': _handle_generic_error,
-        'PermissionDenied': _handle_generic_error,
         'Http404': _handle_generic_error,
+        'PermissionDenied': _handle_generic_error,
+        'ValidationError': _handle_generic_error,
+        'IntegrityError': _handle_generic_error,
     }
 
     response = exception_handler(exc, context)
@@ -19,9 +20,12 @@ def core_exception_handler(exc, context):
     exception_class = exc.__class__.__name__
 
     if not response:
-        if exception_class == 'ValidationError':
+        if exception_class in ('ValidationError',):
             response = Response(exc.message_dict, status=status.HTTP_400_BAD_REQUEST)
             # print(exc.error_dict, exc.message_dict, exc.messages)
+
+        elif exception_class in ('IntegrityError',):
+            response = Response(exc.args[0], status=status.HTTP_400_BAD_REQUEST)
 
     if response and exception_class in handlers:
         return handlers[exception_class](exc, context, response)

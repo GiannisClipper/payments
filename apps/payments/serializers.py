@@ -40,18 +40,18 @@ class PaymentSerializer(serializers.HyperlinkedModelSerializer):
         }
         # extra_kwargs = error_messages
 
-    def validate(self, data):
-        errors = {}
-        if data.get('genre', None) and data['genre'].user.pk != data['user'].pk:
-            errors['genre'] = 'Not a valid genre.'
+    # def validate(self, data):
+    #     errors = {}
+    #     if data.get('genre', None) and data['genre'].user.pk != data['user'].pk:
+    #         errors['genre'] = 'Not a valid genre.'
 
-        if data.get('fund', None) and data['fund'].user.pk != data['user'].pk:
-            errors['fund'] = 'Not a valid fund.'
+    #     if data.get('fund', None) and data['fund'].user.pk != data['user'].pk:
+    #         errors['fund'] = 'Not a valid fund.'
 
-        if errors:
-            raise serializers.ValidationError(errors)
+    #     if errors:
+    #         raise serializers.ValidationError(errors)
 
-        return data
+    #     return data
 
     def create(self, validated_data):
         return Payment.objects.create(**validated_data)

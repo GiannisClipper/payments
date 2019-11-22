@@ -6,6 +6,12 @@ from genres.models import Genre
 
 from genres.tests import GenresTests
 
+from genres.constants import (
+    USER_REQUIRED,
+    CODE_REQUIRED,
+    NAME_REQUIRED,
+)
+
 
 class GenreModelTests(GenresTests):
     pass
@@ -75,9 +81,12 @@ class GenreModelValidationOnCreateTests(GenreModelTests):
             errors = dict(err)
 
         self.assertIn('user', errors.keys())
+        self.assertIn(USER_REQUIRED, errors['user'])
         self.assertIn('code', errors.keys())
+        self.assertIn(CODE_REQUIRED, errors['code'])
         self.assertIn('name', errors.keys())
-        self.assertNotIn('fund', errors.keys())
+        self.assertIn(NAME_REQUIRED, errors['name'])
+        self.assertEqual(3, len(errors))
 
     def test_required_errors_by_passing_empty_values(self):
         errors = ''
@@ -93,9 +102,12 @@ class GenreModelValidationOnCreateTests(GenreModelTests):
             errors = dict(err)
 
         self.assertIn('user', errors.keys())
+        self.assertIn(USER_REQUIRED, errors['user'])
         self.assertIn('code', errors.keys())
+        self.assertIn(CODE_REQUIRED, errors['code'])
         self.assertIn('name', errors.keys())
-        self.assertNotIn('fund', errors.keys())
+        self.assertIn(NAME_REQUIRED, errors['name'])
+        self.assertEqual(3, len(errors))
 
     def test_unique_errors(self):
         errors = ''

@@ -32,11 +32,11 @@ class GenreSerializer(serializers.HyperlinkedModelSerializer):
 
         # extra_kwargs = error_messages
 
-    def validate(self, data):
-        if data.get('fund', None) and data['fund'].user.pk != data['user'].pk:
-            raise serializers.ValidationError({'fund': 'Not a valid fund.'})
+    # def validate(self, data):
+    #     if data.get('fund', None) and data['fund'].user.pk != data['user'].pk:
+    #         raise serializers.ValidationError({'fund': 'Not a valid fund.'})
 
-        return data
+    #     return data
 
     def create(self, validated_data):
         return Genre.objects.create(**validated_data)
