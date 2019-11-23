@@ -7,15 +7,6 @@ from genres.models import Genre
 
 from genres.tests import GenresTests
 
-from genres.constants import (
-    USER_REQUIRED,
-    CODE_REQUIRED,
-    NAME_REQUIRED,
-    CODE_EXISTS,
-    NAME_EXISTS,
-    FUND_INVALID,
-)
-
 
 class GenreModelTests(GenresTests):
     pass
@@ -85,11 +76,8 @@ class GenreModelValidationOnCreateTests(GenreModelTests):
             errors = dict(err)
 
         self.assertIn('user', errors.keys())
-        self.assertIn(USER_REQUIRED, errors['user'])
         self.assertIn('code', errors.keys())
-        self.assertIn(CODE_REQUIRED, errors['code'])
         self.assertIn('name', errors.keys())
-        self.assertIn(NAME_REQUIRED, errors['name'])
         self.assertEqual(3, len(errors))
 
     def test_required_errors_by_passing_empty_values(self):
@@ -106,11 +94,8 @@ class GenreModelValidationOnCreateTests(GenreModelTests):
             errors = dict(err)
 
         self.assertIn('user', errors.keys())
-        self.assertIn(USER_REQUIRED, errors['user'])
         self.assertIn('code', errors.keys())
-        self.assertIn(CODE_REQUIRED, errors['code'])
         self.assertIn('name', errors.keys())
-        self.assertIn(NAME_REQUIRED, errors['name'])
         self.assertEqual(3, len(errors))
 
     def test_unique_errors(self):
@@ -137,7 +122,6 @@ class GenreModelValidationOnCreateTests(GenreModelTests):
             errors = err.args[0]
 
         self.assertIn('fund', errors.keys())
-        self.assertIn(FUND_INVALID, errors['fund'])
         self.assertEqual(1, len(errors))
 
     def test_same_values_to_other_users(self):
@@ -171,11 +155,8 @@ class GenreModelValidationOnUpdateTests(GenreModelTests):
             errors = dict(err)
 
         self.assertIn('user', errors.keys())
-        self.assertIn(USER_REQUIRED, errors['user'])
         self.assertIn('code', errors.keys())
-        self.assertIn(CODE_REQUIRED, errors['code'])
         self.assertIn('name', errors.keys())
-        self.assertIn(NAME_REQUIRED, errors['name'])
         self.assertEqual(3, len(errors))
 
     def test_unique_errors(self):
@@ -211,5 +192,4 @@ class GenreModelValidationOnUpdateTests(GenreModelTests):
             errors = err.args[0]
 
         self.assertIn('fund', errors.keys())
-        self.assertIn(FUND_INVALID, errors['fund'])
         self.assertEqual(1, len(errors))

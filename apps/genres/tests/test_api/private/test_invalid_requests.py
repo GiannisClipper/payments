@@ -20,16 +20,6 @@ class AdminPost(AdminPrivateGenresAPITests):
 
     METHOD = 'POST'
 
-    def test_when_values_exists(self):
-        sample = self.samples['genres'][11]
-        self.create_genre(**sample)
-
-        res = self.api_request(ROOT_URL, self.METHOD, payload=sample, token=self.token)
-
-        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn('errors', res.data)
-        self.assertEqual(res.data['token'], self.token)
-
     def test_when_values_are_missing(self):
         sample = {}
 
@@ -38,16 +28,28 @@ class AdminPost(AdminPrivateGenresAPITests):
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('errors', res.data)
         self.assertIn('user', res.data['errors'])
-        self.assertIn(USER_REQUIRED, res.data['errors']['user'])
         self.assertIn('code', res.data['errors'])
-        self.assertIn(CODE_REQUIRED, res.data['errors']['code'])
         self.assertIn('name', res.data['errors'])
-        self.assertIn(NAME_REQUIRED, res.data['errors']['name'])
         self.assertEqual(3, len(res.data['errors']))
-
+        self.assertIn(USER_REQUIRED, res.data['errors']['user'])
+        self.assertIn(CODE_REQUIRED, res.data['errors']['code'])
+        self.assertIn(NAME_REQUIRED, res.data['errors']['name'])
         self.assertEqual(res.data['token'], self.token)
 
-    def test_when_invalid_fund_user(self):
+    def test_when_values_exists(self):
+        sample = self.samples['genres'][11]
+        self.create_genre(**sample)
+
+        res = self.api_request(ROOT_URL, self.METHOD, payload=sample, token=self.token)
+
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('errors', res.data)
+        self.assertEqual(2, len(res.data['errors']))
+        self.assertIn(CODE_EXISTS, res.data['errors']['code'])
+        self.assertIn(NAME_EXISTS, res.data['errors']['name'])
+        self.assertEqual(res.data['token'], self.token)
+
+    def test_when_fund_user_is_invalid(self):
         sample = self.samples['genres'][11]
         sample['fund']['id'] = self.samples['funds'][21]['id']
         res = self.api_request(ROOT_URL, self.METHOD, payload=sample, token=self.token)
@@ -78,19 +80,6 @@ class AdminPatch(AdminGet):
 
     METHOD = 'PATCH'
 
-    def test_when_values_exists(self):
-        sample = self.samples['genres'][11]
-        self.create_genre(**sample)
-        sample = self.samples['genres'][12]
-        self.create_genre(**sample)
-        sample.pop('user', None)
-
-        res = self.api_request(BY_ID_1_URL, 'PATCH', payload=sample, token=self.token)
-
-        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn('errors', res.data)
-        self.assertEqual(res.data['token'], self.token)
-
     def test_when_values_are_empty(self):
         sample = self.samples['genres'][11]
         self.create_genre(**sample)
@@ -103,6 +92,23 @@ class AdminPatch(AdminGet):
         self.assertIn('user', res.data['errors'])
         self.assertIn('code', res.data['errors'])
         self.assertIn('name', res.data['errors'])
+        self.assertEqual(3, len(res.data['errors']))
+        self.assertIn(USER_REQUIRED, res.data['errors']['user'])
+        self.assertIn(CODE_REQUIRED, res.data['errors']['code'])
+        self.assertIn(NAME_REQUIRED, res.data['errors']['name'])
+        self.assertEqual(res.data['token'], self.token)
+
+    def test_when_values_exists(self):
+        sample = self.samples['genres'][11]
+        self.create_genre(**sample)
+        sample = self.samples['genres'][12]
+        self.create_genre(**sample)
+        sample.pop('user', None)
+
+        res = self.api_request(BY_ID_1_URL, 'PATCH', payload=sample, token=self.token)
+
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('errors', res.data)
         self.assertEqual(res.data['token'], self.token)
 
 

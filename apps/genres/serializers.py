@@ -1,11 +1,21 @@
 from rest_framework import serializers
+from django.db import IntegrityError
 
 from django.shortcuts import get_object_or_404
 
 from users.serializers import UserSerializerField
 from funds.serializers import FundSerializerField
 
-from .models import Genre  # , error_messages
+from .models import Genre
+
+from genres.constants import (
+    USER_REQUIRED,
+    CODE_REQUIRED,
+    NAME_REQUIRED,
+    CODE_EXISTS,
+    NAME_EXISTS,
+    FUND_INVALID,
+)
 
 
 class GenreSerializer(serializers.HyperlinkedModelSerializer):
@@ -16,7 +26,13 @@ class GenreSerializer(serializers.HyperlinkedModelSerializer):
     def get_id(self, obj):
         return obj.pk
 
-    user = UserSerializerField()
+    user = UserSerializerField(
+        error_messages={
+            'required': USER_REQUIRED,
+            'null': USER_REQUIRED,
+            'blank': USER_REQUIRED,
+        }
+    )
 
     fund = FundSerializerField(allow_null=True, default=None)
 
@@ -30,13 +46,41 @@ class GenreSerializer(serializers.HyperlinkedModelSerializer):
         model = Genre
         fields = ('id', 'user', 'code', 'name', 'is_incoming', 'fund', 'url')
 
-        # extra_kwargs = error_messages
+        extra_kwargs = {
+            'code': {
+                'error_messages': {
+                    'required': CODE_REQUIRED,
+                    'null': CODE_REQUIRED,
+                    'blank': CODE_REQUIRED,
+                },
+            },
+            'name': {
+                'error_messages': {
+                    'required': NAME_REQUIRED,
+                    'null': NAME_REQUIRED,
+                    'blank': NAME_REQUIRED,
+                },
+            },
+        }
 
-    # def validate(self, data):
-    #     if data.get('fund', None) and data['fund'].user.pk != data['user'].pk:
-    #         raise serializers.ValidationError({'fund': 'Not a valid fund.'})
+        validators = [
+            serializers.UniqueTogetherValidator(
+                queryset=model.objects.all(),
+                fields=('user', 'code'),
+                message=CODE_EXISTS
+            ),
+            serializers.UniqueTogetherValidator(
+                queryset=model.objects.all(),
+                fields=('user', 'name'),
+                message=NAME_EXISTS
+            )
+        ]
 
-    #     return data
+    def validate(self, data):
+        if data.get('fund', None) and data['fund'].user.pk != data['user'].pk:
+            raise IntegrityError({'fund': FUND_INVALID})
+
+        return data
 
     def create(self, validated_data):
         return Genre.objects.create(**validated_data)
