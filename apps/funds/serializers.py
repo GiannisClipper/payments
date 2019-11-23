@@ -4,7 +4,15 @@ from django.shortcuts import get_object_or_404
 
 from users.serializers import UserSerializerField
 
-from .models import Fund  # , error_messages
+from .models import Fund
+
+from genres.constants import (
+    USER_REQUIRED,
+    CODE_REQUIRED,
+    NAME_REQUIRED,
+    CODE_EXISTS,
+    NAME_EXISTS,
+)
 
 
 class FundSerializer(serializers.HyperlinkedModelSerializer):
@@ -15,7 +23,13 @@ class FundSerializer(serializers.HyperlinkedModelSerializer):
     def get_id(self, obj):
         return obj.pk
 
-    user = UserSerializerField()
+    user = UserSerializerField(
+        error_messages={
+            'required': USER_REQUIRED,
+            'null': USER_REQUIRED,
+            'blank': USER_REQUIRED,
+        }
+    )
 
     url = serializers.HyperlinkedIdentityField(
         view_name='funds:by-id',
@@ -27,8 +41,36 @@ class FundSerializer(serializers.HyperlinkedModelSerializer):
         model = Fund
         fields = ('id', 'user', 'code', 'name', 'url')
 
-        # extra_kwargs = error_messages
+        extra_kwargs = {
+            'code': {
+                'error_messages': {
+                    'required': CODE_REQUIRED,
+                    'null': CODE_REQUIRED,
+                    'blank': CODE_REQUIRED,
+                },
+            },
+            'name': {
+                'error_messages': {
+                    'required': NAME_REQUIRED,
+                    'null': NAME_REQUIRED,
+                    'blank': NAME_REQUIRED,
+                },
+            },
+        }
 
+        validators = [
+            serializers.UniqueTogetherValidator(
+                queryset=model.objects.all(),
+                fields=('user', 'code'),
+                message=CODE_EXISTS
+            ),
+            serializers.UniqueTogetherValidator(
+                queryset=model.objects.all(),
+                fields=('user', 'name'),
+                message=NAME_EXISTS
+            )
+        ]
+        
     def create(self, validated_data):
         return Fund.objects.create(**validated_data)
 

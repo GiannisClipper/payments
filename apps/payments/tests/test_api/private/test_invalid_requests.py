@@ -5,23 +5,21 @@ from payments.tests.test_api import ROOT_URL, BY_ID_1_URL, LIST_URL
 
 from . import AdminPrivatePaymentsAPITests, OwnerPrivatePaymentsAPITests
 
+from payments.constants import (
+    USER_REQUIRED,
+    DATE_REQUIRED,
+    GENRE_REQUIRED,
+    FUND_REQUIRED,
+    PAYMENT_EXISTS,
+    GENRE_INVALID,
+    FUND_INVALID,
+)
+
 
 class AdminPost(AdminPrivatePaymentsAPITests):
     '''Test admin's invalid POST requests to payments API.'''
 
     METHOD = 'POST'
-
-    def test_when_values_exists(self):
-        sample = self.samples['payments'][11]
-        self.create_payment(**sample)
-
-        res = self.api_request(ROOT_URL, self.METHOD, payload=sample, token=self.token)
-
-        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn('errors', res.data)
-        self.assertIn('__all__', res.data['errors'])
-        self.assertEqual(1, len(res.data['errors']))
-        self.assertEqual(res.data['token'], self.token)
 
     def test_when_values_are_missing(self):
         sample = {}
@@ -34,10 +32,27 @@ class AdminPost(AdminPrivatePaymentsAPITests):
         self.assertIn('date', res.data['errors'])
         self.assertIn('genre', res.data['errors'])
         self.assertIn('fund', res.data['errors'])
+        self.assertIn(USER_REQUIRED, res.data['errors']['user'])
+        self.assertIn(DATE_REQUIRED, res.data['errors']['date'])
+        self.assertIn(GENRE_REQUIRED, res.data['errors']['genre'])
+        self.assertIn(FUND_REQUIRED, res.data['errors']['fund'])
         self.assertEqual(4, len(res.data['errors']))
         self.assertEqual(res.data['token'], self.token)
 
-    def test_when_invalid_genre_user_or_fund_user(self):
+    def test_when_values_exists(self):
+        sample = self.samples['payments'][11]
+        self.create_payment(**sample)
+
+        res = self.api_request(ROOT_URL, self.METHOD, payload=sample, token=self.token)
+
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('errors', res.data)
+        self.assertIn('__all__', res.data['errors'])
+        self.assertEqual(1, len(res.data['errors']))
+        self.assertIn(PAYMENT_EXISTS, res.data['errors']['payment'])
+        self.assertEqual(res.data['token'], self.token)
+
+    def test_when_genre_user_or_fund_user_are_invalid(self):
         sample = self.samples['payments'][11]
         sample['genre']['id'] = self.samples['genres'][21]['id']
         sample['fund']['id'] = self.samples['funds'][21]['id']
@@ -48,6 +63,8 @@ class AdminPost(AdminPrivatePaymentsAPITests):
         self.assertIn('genre', res.data['errors'])
         self.assertIn('fund', res.data['errors'])
         self.assertEqual(2, len(res.data['errors']))
+        self.assertIn(GENRE_INVALID, res.data['errors']['genre'])
+        self.assertIn(FUND_INVALID, res.data['errors']['fund'])
         self.assertEqual(res.data['token'], self.token)
 
 

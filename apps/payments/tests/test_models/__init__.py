@@ -29,18 +29,18 @@ class PaymentModelBasicTests(PaymentModelTests):
     def test_create(self):
         payment_ = self.samples['payments'][11]
         payment1 = self.create_payment(**payment_)
+        payment_['incoming'] = payment_['incoming'] if payment_['incoming'] else 0
+        payment_['outgoing'] = payment_['outgoing'] if payment_['outgoing'] else 0
+        payment_['remarks'] = payment_['remarks'] if payment_['remarks'] else ''
 
         self.assertEqual(payment1.user.id, payment_['user']['id'])
         self.assertEqual(
             payment1.date, datetime.datetime.strptime(payment_['date'], "%Y-%m-%d").date()
         )
         self.assertEqual(payment1.genre.id, payment_['genre']['id'])
-        payment_['incoming'] = payment_['incoming'] if payment_['incoming'] else 0
-        payment_['outgoing'] = payment_['outgoing'] if payment_['outgoing'] else 0
         self.assertEqual(payment1.incoming, payment_['incoming'])
         self.assertEqual(payment1.outgoing, payment_['outgoing'])
         self.assertEqual(payment1.fund.id, payment_['fund']['id'])
-        payment_['remarks'] = payment_['remarks'] if payment_['remarks'] else ''
         self.assertEqual(payment1.remarks, payment_['remarks'])
 
     def test_update(self):
@@ -51,18 +51,18 @@ class PaymentModelBasicTests(PaymentModelTests):
         payment_['fund'] = Fund.objects.get(pk=payment_['fund']['id'])
         payment_['genre'] = Genre.objects.get(pk=payment_['genre']['id'])
         payment2 = payment1.update(**payment_)
+        payment_['incoming'] = payment_['incoming'] if payment_['incoming'] else 0
+        payment_['outgoing'] = payment_['outgoing'] if payment_['outgoing'] else 0
+        payment_['remarks'] = payment_['remarks'] if payment_['remarks'] else ''
 
         self.assertEqual(payment2, payment1)
         self.assertEqual(
             payment2.date, datetime.datetime.strptime(payment_['date'], "%Y-%m-%d").date()
         )
         self.assertEqual(payment2.genre, payment_['genre'])
-        payment_['incoming'] = payment_['incoming'] if payment_['incoming'] else 0
-        payment_['outgoing'] = payment_['outgoing'] if payment_['outgoing'] else 0
         self.assertEqual(payment2.incoming, payment_['incoming'])
         self.assertEqual(payment2.outgoing, payment_['outgoing'])
         self.assertEqual(payment2.fund, payment_['fund'])
-        payment_['remarks'] = payment_['remarks'] if payment_['remarks'] else ''
         self.assertEqual(payment2.remarks, payment_['remarks'])
 
     def test_delete(self):
@@ -103,10 +103,8 @@ class PaymentModelValidationOnCreateTests(PaymentModelTests):
         self.assertIn('user', errors.keys())
         self.assertIn('date', errors.keys())
         self.assertIn('genre', errors.keys())
-        self.assertNotIn('incoming', errors.keys())
-        self.assertNotIn('outgoing', errors.keys())
         self.assertIn('fund', errors.keys())
-        self.assertNotIn('remarks', errors.keys())
+        self.assertEqual(4, len(errors))
 
     def test_required_errors_by_passing_empty_values(self):
         errors = ''
@@ -127,10 +125,8 @@ class PaymentModelValidationOnCreateTests(PaymentModelTests):
         self.assertIn('user', errors.keys())
         self.assertIn('date', errors.keys())
         self.assertIn('genre', errors.keys())
-        self.assertNotIn('incoming', errors.keys())
-        self.assertNotIn('outgoing', errors.keys())
         self.assertIn('fund', errors.keys())
-        self.assertNotIn('remarks', errors.keys())
+        self.assertEqual(4, len(errors))
 
     def test_unique_errors(self):
         errors = ''
@@ -169,10 +165,8 @@ class PaymentModelValidationOnUpdateTests(PaymentModelTests):
         self.assertIn('user', errors.keys())
         self.assertIn('date', errors.keys())
         self.assertIn('genre', errors.keys())
-        self.assertNotIn('incoming', errors.keys())
-        self.assertNotIn('outgoing', errors.keys())
         self.assertIn('fund', errors.keys())
-        self.assertNotIn('remarks', errors.keys())
+        self.assertEqual(4, len(errors))
 
     def test_unique_errors(self):
         errors = ''

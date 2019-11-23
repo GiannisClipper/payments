@@ -44,6 +44,8 @@ class AdminPost(AdminPrivateGenresAPITests):
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('errors', res.data)
+        self.assertIn('code', res.data['errors'])
+        self.assertIn('name', res.data['errors'])
         self.assertEqual(2, len(res.data['errors']))
         self.assertIn(CODE_EXISTS, res.data['errors']['code'])
         self.assertIn(NAME_EXISTS, res.data['errors']['name'])
@@ -109,6 +111,11 @@ class AdminPatch(AdminGet):
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('errors', res.data)
+        self.assertIn('code', res.data['errors'])
+        self.assertIn('name', res.data['errors'])
+        self.assertEqual(2, len(res.data['errors']))
+        self.assertIn(CODE_EXISTS, res.data['errors']['code'])
+        self.assertIn(NAME_EXISTS, res.data['errors']['name'])
         self.assertEqual(res.data['token'], self.token)
 
 
@@ -133,6 +140,9 @@ class OwnerPost(OwnerPrivateGenresAPITests, AdminPost):
         # No check for `user` in errors, automatically gets the owner
         self.assertIn('code', res.data['errors'])
         self.assertIn('name', res.data['errors'])
+        self.assertEqual(2, len(res.data['errors']))
+        self.assertIn(CODE_REQUIRED, res.data['errors']['code'])
+        self.assertIn(NAME_REQUIRED, res.data['errors']['name'])
         self.assertEqual(res.data['token'], self.token)
 
 

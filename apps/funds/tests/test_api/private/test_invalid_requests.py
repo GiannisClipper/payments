@@ -5,21 +5,19 @@ from funds.tests.test_api import ROOT_URL, BY_ID_1_URL, LIST_URL
 
 from . import AdminPrivateFundsAPITests, OwnerPrivateFundsAPITests
 
+from funds.constants import (
+    USER_REQUIRED,
+    CODE_REQUIRED,
+    NAME_REQUIRED,
+    CODE_EXISTS,
+    NAME_EXISTS,
+)
+
 
 class AdminPost(AdminPrivateFundsAPITests):
     '''Test admin's invalid POST requests to funds API.'''
 
     METHOD = 'POST'
-
-    def test_when_values_exists(self):
-        sample = self.samples['funds'][11]
-        self.create_fund(**sample)
-
-        res = self.api_request(ROOT_URL, self.METHOD, payload=sample, token=self.token)
-
-        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn('errors', res.data)
-        self.assertEqual(res.data['token'], self.token)
 
     def test_when_values_are_missing(self):
         sample = {}
@@ -31,6 +29,25 @@ class AdminPost(AdminPrivateFundsAPITests):
         self.assertIn('user', res.data['errors'])
         self.assertIn('code', res.data['errors'])
         self.assertIn('name', res.data['errors'])
+        self.assertEqual(3, len(res.data['errors']))
+        self.assertIn(USER_REQUIRED, res.data['errors']['user'])
+        self.assertIn(CODE_REQUIRED, res.data['errors']['code'])
+        self.assertIn(NAME_REQUIRED, res.data['errors']['name'])
+        self.assertEqual(res.data['token'], self.token)
+
+    def test_when_values_exists(self):
+        sample = self.samples['funds'][11]
+        self.create_fund(**sample)
+
+        res = self.api_request(ROOT_URL, self.METHOD, payload=sample, token=self.token)
+
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('errors', res.data)
+        self.assertIn('code', res.data['errors'])
+        self.assertIn('name', res.data['errors'])
+        self.assertEqual(2, len(res.data['errors']))
+        self.assertIn(CODE_EXISTS, res.data['errors']['code'])
+        self.assertIn(NAME_EXISTS, res.data['errors']['name'])
         self.assertEqual(res.data['token'], self.token)
 
 
@@ -52,19 +69,6 @@ class AdminPatch(AdminGet):
 
     METHOD = 'PATCH'
 
-    def test_when_values_exists(self):
-        sample = self.samples['funds'][11]
-        self.create_fund(**sample)
-        sample = self.samples['funds'][12]
-        self.create_fund(**sample)
-        sample.pop('user', None)
-
-        res = self.api_request(BY_ID_1_URL, 'PATCH', payload=sample, token=self.token)
-
-        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn('errors', res.data)
-        self.assertEqual(res.data['token'], self.token)
-
     def test_when_values_are_empty(self):
         sample = self.samples['funds'][11]
         self.create_fund(**sample)
@@ -77,6 +81,28 @@ class AdminPatch(AdminGet):
         self.assertIn('user', res.data['errors'])
         self.assertIn('code', res.data['errors'])
         self.assertIn('name', res.data['errors'])
+        self.assertEqual(3, len(res.data['errors']))
+        self.assertIn(USER_REQUIRED, res.data['errors']['user'])
+        self.assertIn(CODE_REQUIRED, res.data['errors']['code'])
+        self.assertIn(NAME_REQUIRED, res.data['errors']['name'])
+        self.assertEqual(res.data['token'], self.token)
+
+    def test_when_values_exists(self):
+        sample = self.samples['funds'][11]
+        self.create_fund(**sample)
+        sample = self.samples['funds'][12]
+        self.create_fund(**sample)
+        sample.pop('user', None)
+
+        res = self.api_request(BY_ID_1_URL, 'PATCH', payload=sample, token=self.token)
+
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('errors', res.data)
+        self.assertIn('code', res.data['errors'])
+        self.assertIn('name', res.data['errors'])
+        self.assertEqual(2, len(res.data['errors']))
+        self.assertIn(CODE_EXISTS, res.data['errors']['code'])
+        self.assertIn(NAME_EXISTS, res.data['errors']['name'])
         self.assertEqual(res.data['token'], self.token)
 
 
@@ -101,6 +127,10 @@ class OwnerPost(OwnerPrivateFundsAPITests, AdminPost):
         # No check for `user` in errors, automatically gets the owner
         self.assertIn('code', res.data['errors'])
         self.assertIn('name', res.data['errors'])
+        self.assertEqual(2, len(res.data['errors']))
+        self.assertIn(CODE_REQUIRED, res.data['errors']['code'])
+        self.assertIn(NAME_REQUIRED, res.data['errors']['name'])
+
         self.assertEqual(res.data['token'], self.token)
 
 

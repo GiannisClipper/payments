@@ -1,10 +1,21 @@
 from rest_framework import serializers
+from django.db import IntegrityError
 
 from users.serializers import UserSerializerField
 from funds.serializers import FundSerializerField
 from genres.serializers import GenreSerializerField
 
 from .models import Payment  # , error_messages
+
+from payments.constants import (
+    USER_REQUIRED,
+    DATE_REQUIRED,
+    GENRE_REQUIRED,
+    FUND_REQUIRED,
+    PAYMENT_EXISTS,
+    GENRE_INVALID,
+    FUND_INVALID,
+)
 
 
 class PaymentSerializer(serializers.HyperlinkedModelSerializer):
@@ -15,11 +26,29 @@ class PaymentSerializer(serializers.HyperlinkedModelSerializer):
     def get_id(self, obj):
         return obj.pk
 
-    user = UserSerializerField()
+    user = UserSerializerField(
+        error_messages={
+            'required': USER_REQUIRED,
+            'null': USER_REQUIRED,
+            'blank': USER_REQUIRED,
+        }
+    )
 
-    genre = GenreSerializerField()
+    genre = GenreSerializerField(
+        error_messages={
+            'required': GENRE_REQUIRED,
+            'null': GENRE_REQUIRED,
+            'blank': GENRE_REQUIRED,
+        }
+    )
 
-    fund = FundSerializerField()
+    fund = FundSerializerField(
+        error_messages={
+            'required': FUND_REQUIRED,
+            'null': FUND_REQUIRED,
+            'blank': FUND_REQUIRED,
+        }
+    )
 
     url = serializers.HyperlinkedIdentityField(
         view_name='payments:by-id',
@@ -34,24 +63,39 @@ class PaymentSerializer(serializers.HyperlinkedModelSerializer):
         )
 
         extra_kwargs = {
+            'date': {
+                'error_messages': {
+                    'required': DATE_REQUIRED,
+                    'null': DATE_REQUIRED,
+                    'blank': DATE_REQUIRED,
+                },
+            },
             'incoming': {'required': False},
             'outgoing': {'required': False},
-            'remarks': {'required': False}
+            'remarks': {'required': False},
         }
-        # extra_kwargs = error_messages
 
-    # def validate(self, data):
-    #     errors = {}
-    #     if data.get('genre', None) and data['genre'].user.pk != data['user'].pk:
-    #         errors['genre'] = 'Not a valid genre.'
+        validators = [
+            serializers.UniqueTogetherValidator(
+                queryset=model.objects.all(),
+                fields=('user', 'date', 'genre', 'incoming', 'outgoing', 'fund', 'remarks'),
+                message=PAYMENT_EXISTS
+            ),
+        ]
 
-    #     if data.get('fund', None) and data['fund'].user.pk != data['user'].pk:
-    #         errors['fund'] = 'Not a valid fund.'
+    def validate(self, data):
+        errors = {}
 
-    #     if errors:
-    #         raise serializers.ValidationError(errors)
+        if data.get('genre', None) and data['genre'].user.pk != data['user'].pk:
+            errors['genre'] = GENRE_INVALID
 
-    #     return data
+        if data.get('fund', None) and data['fund'].user.pk != data['user'].pk:
+            errors['fund'] = FUND_INVALID
+
+        if errors:
+            raise IntegrityError(errors)
+
+        return data
 
     def create(self, validated_data):
         return Payment.objects.create(**validated_data)

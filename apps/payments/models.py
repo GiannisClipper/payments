@@ -19,7 +19,6 @@ class Payment(CustomBaseModel):
     date = models.DateField(
         db_index=True,
         null=False,
-
     )
 
     genre = models.ForeignKey(
@@ -49,16 +48,6 @@ class Payment(CustomBaseModel):
     )
 
     class Meta:
-        # problem: exception handler gets raised errors without `response` object
-        #          so we use `unique_together` in place of `constraints`
-        #
-        # constraints = (
-        #     models.UniqueConstraint(
-        #         fields=('user', 'date', 'genre', 'incoming', 'outgoing', 'fund', 'remarks'),
-        #         name='unique_payment'
-        #     ),
-        # )
-
         unique_together = (
             # Unique constraint does not work properly with null values so we need
             # to convert incoming/outgoing None to 0 as well as remarks None to ''
@@ -92,10 +81,10 @@ class Payment(CustomBaseModel):
         errors = {}
 
         if self.genre and self.genre.user.pk != self.user.pk:
-            errors['genre'] = 'Not a valid genre.'
+            errors['genre'] = 'Genre.user integrity error.'
 
         if self.fund and self.fund.user.pk != self.user.pk:
-            errors['fund'] = 'Not a valid fund.'
+            errors['fund'] = 'Fund.user integrity error.'
 
         if errors:
             raise IntegrityError(errors)
