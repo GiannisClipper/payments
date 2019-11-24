@@ -47,7 +47,7 @@ class AdminPost(AdminPrivatePaymentsAPITests):
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('errors', res.data)
-        self.assertIn('__all__', res.data['errors'])
+        self.assertIn('payment', res.data['errors'])
         self.assertEqual(1, len(res.data['errors']))
         self.assertIn(PAYMENT_EXISTS, res.data['errors']['payment'])
         self.assertEqual(res.data['token'], self.token)

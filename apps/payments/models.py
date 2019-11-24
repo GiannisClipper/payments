@@ -29,10 +29,12 @@ class Payment(CustomBaseModel):
 
     incoming = models.FloatField(
         null=True,
+        default=0,
     )
 
     outgoing = models.FloatField(
         null=True,
+        default=0,
     )
 
     fund = models.ForeignKey(
@@ -45,6 +47,7 @@ class Payment(CustomBaseModel):
         max_length=128,
         null=True,
         blank=True,
+        default='',
     )
 
     class Meta:
@@ -59,25 +62,21 @@ class Payment(CustomBaseModel):
         )
 
     def full_clean(self):
-        # Unique constraint does not work properly with null values so we need
-        # to convert incoming/outgoing None to 0 as well as remarks None to ''
-
-        value = getattr(self, 'incoming')
-        if value is None:
+        # An `incoming` value is necessary for unique_together validation
+        if getattr(self, 'incoming') is None:
             setattr(self, 'incoming', 0)
 
-        value = getattr(self, 'outgoing')
-        if value is None:
+        # An `outgoing` value is necessary for unique_together validation
+        if getattr(self, 'outgoing') is None:
             setattr(self, 'outgoing', 0)
 
-        value = getattr(self, 'remarks')
-        if value is None:
+        # A `remarks` value is necessary for unique_together validation
+        if getattr(self, 'remarks') is None:
             setattr(self, 'remarks', '')
 
         super().full_clean()
 
         # Check `user` integrity as the same owner of `payment`, `genre` and `fund`
-
         errors = {}
 
         if self.genre and self.genre.user.pk != self.user.pk:
