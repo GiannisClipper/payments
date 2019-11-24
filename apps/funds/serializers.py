@@ -70,7 +70,7 @@ class FundSerializer(serializers.HyperlinkedModelSerializer):
                 message=NAME_EXISTS
             )
         ]
-        
+
     def create(self, validated_data):
         return Fund.objects.create(**validated_data)
 

@@ -6,15 +6,6 @@ from django.core.exceptions import ValidationError
 from users.models import User
 from users.tests import UsersTests
 
-from users.constants import (
-    USERNAME_REQUIRED,
-    USERNAME_EXISTS,
-    PASSWORD_REQUIRED,
-    PASSWORD_TOO_SHORT,
-    EMAIL_REQUIRED,
-    EMAIL_EXISTS,
-)
-
 
 class UserModelTests(UsersTests):
     pass
@@ -94,11 +85,12 @@ class UserModelValidationOnCreateTests(UserModelTests):
         try:
             self.create_user(**sample)
         except ValidationError as err:
-            errors = str(err)
+            errors = dict(err)
 
-        self.assertIn(USERNAME_REQUIRED, errors)
-        self.assertIn(PASSWORD_REQUIRED, errors)
-        self.assertIn(EMAIL_REQUIRED, errors)
+        self.assertIn('username', errors)
+        self.assertIn('password', errors)
+        self.assertIn('email', errors)
+        self.assertEqual(3, len(errors))
 
     def test_required_errors_by_passing_empty_values(self):
         errors = ''
@@ -110,11 +102,12 @@ class UserModelValidationOnCreateTests(UserModelTests):
         try:
             self.create_user(**sample)
         except ValidationError as err:
-            errors = str(err)
+            errors = dict(err)
 
-        self.assertIn(USERNAME_REQUIRED, errors)
-        self.assertIn(PASSWORD_REQUIRED, errors)
-        self.assertIn(EMAIL_REQUIRED, errors)
+        self.assertIn('username', errors)
+        self.assertIn('password', errors)
+        self.assertIn('email', errors)
+        self.assertEqual(3, len(errors))
 
     def test_unique_errors(self):
         errors = ''
@@ -124,10 +117,11 @@ class UserModelValidationOnCreateTests(UserModelTests):
         try:
             self.create_user(**sample)
         except Exception as err:
-            errors = str(err)
+            errors = dict(err)
 
-        self.assertIn(USERNAME_EXISTS, errors)
-        self.assertIn(EMAIL_EXISTS, errors)
+        self.assertIn('username', errors)
+        self.assertIn('email', errors)
+        self.assertEqual(2, len(errors))
 
     def test_password_min_length(self):
         sample = self.samples['users'][1]
@@ -136,9 +130,10 @@ class UserModelValidationOnCreateTests(UserModelTests):
         try:
             self.create_user(**sample)
         except Exception as err:
-            errors = str(err)
+            errors = dict(err)
 
-        self.assertIn(PASSWORD_TOO_SHORT, errors)
+        self.assertIn('password', errors)
+        self.assertEqual(1, len(errors))
 
     def test_email_normalization(self):
         sample = self.samples['users'][1]
@@ -165,11 +160,12 @@ class UserModelValidationOnUpdateTests(UserModelTests):
         try:
             user.update(**sample)
         except ValidationError as err:
-            errors = str(err)
+            errors = dict(err)
 
-        self.assertIn(USERNAME_REQUIRED, errors)
-        self.assertIn(PASSWORD_REQUIRED, errors)
-        self.assertIn(EMAIL_REQUIRED, errors)
+        self.assertIn('username', errors)
+        self.assertIn('password', errors)
+        self.assertIn('email', errors)
+        self.assertEqual(3, len(errors))
 
     def test_unique_errors(self):
         errors = ''
@@ -181,7 +177,8 @@ class UserModelValidationOnUpdateTests(UserModelTests):
         try:
             user.update(**sample1)
         except Exception as err:
-            errors = str(err)
+            errors = dict(err)
 
-        self.assertIn(USERNAME_EXISTS, errors)
-        self.assertIn(EMAIL_EXISTS, errors)
+        self.assertIn('username', errors)
+        self.assertIn('email', errors)
+        self.assertEqual(2, len(errors))

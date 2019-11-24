@@ -88,7 +88,6 @@ class Payment(CustomBaseModel):
         if errors:
             raise IntegrityError(errors)
 
-
     def __str__(self):
         amount = self.incoming if self.genre.is_incoming else self.outgoing
 

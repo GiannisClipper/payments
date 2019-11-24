@@ -6,12 +6,12 @@ from . import PublicUsersAPITests
 
 from users.constants import (
     USERNAME_REQUIRED,
-    USERNAME_EXISTS,
     PASSWORD_REQUIRED,
-    PASSWORD_TOO_SHORT,
     EMAIL_REQUIRED,
+    USERNAME_EXISTS,
     EMAIL_EXISTS,
-    INPUT_NOT_MATCH,
+    PASSWORD_TOO_SHORT,
+    CREDENTIALS_NOT_MATCH,
 )
 
 SIGNUP_URL = reverse('users:signup')
@@ -27,6 +27,10 @@ class SignupAPITests(PublicUsersAPITests):
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('errors', res.data)
+        self.assertIn('username', res.data['errors'])
+        self.assertIn('password', res.data['errors'])
+        self.assertIn('email', res.data['errors'])
+        self.assertEqual(3, len(res.data['errors']))
         self.assertIn(USERNAME_REQUIRED, res.data['errors']['username'])
         self.assertIn(PASSWORD_REQUIRED, res.data['errors']['password'])
         self.assertIn(EMAIL_REQUIRED, res.data['errors']['email'])
@@ -39,6 +43,10 @@ class SignupAPITests(PublicUsersAPITests):
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('errors', res.data)
+        self.assertIn('username', res.data['errors'])
+        self.assertIn('password', res.data['errors'])
+        self.assertIn('email', res.data['errors'])
+        self.assertEqual(3, len(res.data['errors']))
         self.assertIn(USERNAME_EXISTS, res.data['errors']['username'])
         self.assertIn(PASSWORD_TOO_SHORT, res.data['errors']['password'])
         self.assertIn(EMAIL_EXISTS, res.data['errors']['email'])
@@ -53,6 +61,9 @@ class SigninAPITests(PublicUsersAPITests):
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('errors', res.data)
+        self.assertIn('username', res.data['errors'])
+        self.assertIn('password', res.data['errors'])
+        self.assertEqual(2, len(res.data['errors']))
         self.assertIn(USERNAME_REQUIRED, res.data['errors']['username'])
         self.assertIn(PASSWORD_REQUIRED, res.data['errors']['password'])
 
@@ -63,4 +74,4 @@ class SigninAPITests(PublicUsersAPITests):
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('errors', res.data)
-        self.assertIn(INPUT_NOT_MATCH, res.data['errors']['error'])
+        self.assertIn(CREDENTIALS_NOT_MATCH, res.data['errors']['credentials'])

@@ -11,7 +11,7 @@ from users.constants import (
     PASSWORD_TOO_SHORT,
     EMAIL_REQUIRED,
     EMAIL_EXISTS,
-    INPUT_NOT_MATCH,
+    CREDENTIALS_NOT_MATCH,
 )
 
 BY_ID_1_URL = reverse('users:by-id', kwargs={'id': 1})  # first admin id
@@ -56,6 +56,10 @@ class AdminPatchUserByIdAPITests(AdminGetUserByIdAPITests):
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('errors', res.data)
+        self.assertIn('username', res.data['errors'])
+        self.assertIn('password', res.data['errors'])
+        self.assertIn('email', res.data['errors'])
+        self.assertEqual(3, len(res.data['errors']))
         self.assertIn(USERNAME_EXISTS, res.data['errors']['username'])
         self.assertIn(PASSWORD_TOO_SHORT, res.data['errors']['password'])
         self.assertIn(EMAIL_EXISTS, res.data['errors']['email'])
@@ -71,6 +75,10 @@ class AdminPatchUserByIdAPITests(AdminGetUserByIdAPITests):
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('errors', res.data)
+        self.assertIn('username', res.data['errors'])
+        self.assertIn('password', res.data['errors'])
+        self.assertIn('email', res.data['errors'])
+        self.assertEqual(3, len(res.data['errors']))
         self.assertIn(USERNAME_REQUIRED, res.data['errors']['username'])
         self.assertIn(PASSWORD_REQUIRED, res.data['errors']['password'])
         self.assertIn(EMAIL_REQUIRED, res.data['errors']['email'])
@@ -90,7 +98,7 @@ class AdminDeleteUserByIdAPITests(AdminGetUserByIdAPITests):
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('errors', res.data)
-        self.assertIn(INPUT_NOT_MATCH, res.data['errors'])
+        self.assertIn(CREDENTIALS_NOT_MATCH, res.data['errors'])
         self.assertEqual(token, res.data['token'])
 
 

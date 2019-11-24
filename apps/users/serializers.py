@@ -8,7 +8,7 @@ from .models import User, error_messages
 from .constants import (
     PASSWORD_MIN_LENGTH,
     PASSWORD_TOO_SHORT,
-    INPUT_NOT_MATCH,
+    CREDENTIALS_NOT_MATCH,
 )
 
 
@@ -78,7 +78,7 @@ class SigninSerializer(serializers.Serializer):
         )
 
         if user is None or not user.is_active:
-            raise serializers.ValidationError(INPUT_NOT_MATCH)
+            raise serializers.ValidationError(CREDENTIALS_NOT_MATCH)
 
         return {
             'id': user.pk,
@@ -158,7 +158,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         )
 
         if not signin_user or not signin_user.is_active:
-            raise serializers.ValidationError(INPUT_NOT_MATCH)
+            raise serializers.ValidationError(CREDENTIALS_NOT_MATCH)
 
         instance.delete()
 
