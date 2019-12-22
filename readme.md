@@ -17,6 +17,8 @@ cd projectname
 
         (venv) ...> pip install pyjwt
 
+        (venv) ...> pip install django-cors-headers
+
     Create & run project
 
         (venv) ...> django-admin startproject apps
@@ -88,6 +90,29 @@ cd projectname
         )
 
         }
+
+    Setup django-cors-headers
+
+        (venv) ...apps> pip install django-cors-headers
+
+        Modifications in settings.py:
+
+        INSTALLED_APPS = [
+            ...
+            'corsheaders',
+            ...
+        ]
+
+        MIDDLEWARE = [
+            ...
+            'corsheaders.middleware.CorsMiddleware',
+            'django.middleware.common.CommonMiddleware',
+            ...
+        ]
+
+        CorsMiddleware should be placed as high as possible, especially before any middleware that can generate responses such as Django's CommonMiddleware or Whitenoise's WhiteNoiseMiddleware. If it is not before, it will not be able to add the CORS headers to these responses.
+
+        CORS_ORIGIN_ALLOW_ALL = True
 
     Create superuser
 

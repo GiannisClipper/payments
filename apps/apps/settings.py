@@ -40,6 +40,7 @@ INSTALLED_APPS = [
 
     # start custom settings
 
+    'corsheaders',
     'core',
     'users',
     'funds',
@@ -50,6 +51,13 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    # start custom settings
+
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
+
+    # end custom settings
+
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -140,7 +148,8 @@ REST_FRAMEWORK = {
     # Custom auth backend to authenticate requests or not
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'users.jwtokens.backends.JWTAuthentication',
-    )
+    ),
+
 }
 
 AUTH_USER_MODEL = 'users.User'
@@ -148,5 +157,7 @@ AUTH_USER_MODEL = 'users.User'
 JWTOKEN_PREFIX = 'Token'
 
 JWTOKEN_DURATION = 60 * 60  # 3600 secs/ 1 hour
+
+CORS_ORIGIN_ALLOW_ALL = True
 
 # end custom settings

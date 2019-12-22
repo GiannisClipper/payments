@@ -18,6 +18,7 @@ class SignupAPIView(APIView):
     renderer_classes = (UserJSONRenderer,)
 
     def post(self, request):
+        print(dir(request), request.content_type, dir(request.stream), request.stream.body, request.stream.headers)
         user = request.data.get('user', {})
 
         serializer = self.serializer_class(data=user)
