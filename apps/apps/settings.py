@@ -149,7 +149,6 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'users.jwtokens.backends.JWTAuthentication',
     ),
-
 }
 
 AUTH_USER_MODEL = 'users.User'

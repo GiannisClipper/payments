@@ -1,5 +1,7 @@
 from rest_framework.renderers import JSONRenderer
 
+import json
+
 
 class GenericJSONRenderer(JSONRenderer):
 
@@ -44,4 +46,4 @@ class GenericJSONRenderer(JSONRenderer):
 
         data['token'] = token  # Render `token` key out of data
 
-        return data
+        return json.dumps(data)
