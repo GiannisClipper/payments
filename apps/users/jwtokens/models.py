@@ -80,7 +80,7 @@ class JWToken:
         user = get_user_model().objects.get(pk=id)
 
         if not user:
-            raise Exception(TOKEN_USER_NOT_EXISTS)
+            raise PermissionError(TOKEN_USER_NOT_EXISTS)
 
         return user
 
@@ -88,7 +88,7 @@ class JWToken:
         '''Checks if the user in token is active.'''
 
         if not user.is_active:
-            raise Exception(TOKEN_USER_NOT_ACTIVE)
+            raise PermissionError(TOKEN_USER_NOT_ACTIVE)
 
         return user
 
@@ -98,6 +98,6 @@ class JWToken:
         now = datetime.timestamp(datetime.utcnow())
 
         if expiration <= now:
-            raise Exception(TOKEN_KEY_EXPIRED)
+            raise PermissionError(TOKEN_KEY_EXPIRED)
 
         return expiration
