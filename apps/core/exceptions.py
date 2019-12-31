@@ -2,15 +2,13 @@ from rest_framework.views import exception_handler
 from rest_framework.response import Response
 from rest_framework import status
 
-import json
-
 
 def core_exception_handler(exc, context):
 
     handlers = {
         'Http404': _handle_generic_error,
         'PermissionDenied': _handle_generic_error,
-        #'PermissionError': _handle_generic_error,
+        # 'PermissionError': _handle_generic_error,
         'ValidationError': _handle_generic_error,
         'IntegrityError': _handle_generic_error,
     }
@@ -33,8 +31,8 @@ def core_exception_handler(exc, context):
 
         elif exception_class in ('PermissionError',):
             # Permission error raises when token is invalid
-            # set `token` key in data as blank to bypass repeating authorization in renderer 
-            response = Response({'errors': exc.args[0], 'token': ''}, status=status.HTTP_401_UNAUTHORIZED)
+            # set `token` key in data as blank to bypass repeating authorization in renderer
+            response = Response({'errors': exc.args[0], 'token': ''}, status=status.HTTP_401_UNAUTHORIZED)  # noqa: E501
 
     if response and exception_class in handlers:
         response = handlers[exception_class](exc, context, response)

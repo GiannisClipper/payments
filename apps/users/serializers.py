@@ -36,13 +36,15 @@ class SignupSerializer(serializers.ModelSerializer):
         error_messages=error_messages['password']['error_messages']
     )
 
+    password2 = serializers.CharField(write_only=True)
+
     token = serializers.CharField(read_only=True)
 
     class Meta:
         model = User
 
         # Fields possibly included in request or response
-        fields = ['id', 'username', 'password', 'email', 'is_admin', 'token']
+        fields = ['id', 'username', 'password', 'password2', 'email', 'is_admin', 'token']
 
         extra_kwargs = error_messages
 
@@ -108,6 +110,8 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         error_messages=error_messages['password']['error_messages']
     )
 
+    password2 = serializers.CharField(write_only=True)
+
     is_admin = serializers.SerializerMethodField(read_only=True)
 
     def get_is_admin(self, obj):
@@ -131,7 +135,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = User
-        fields = ('id', 'username', 'password', 'email', 'is_admin', 'is_active', 'url')
+        fields = ('id', 'username', 'password', 'password2', 'email', 'is_admin', 'is_active', 'url')
 
         extra_kwargs = error_messages
 
@@ -139,13 +143,10 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         return instance
 
     def update(self, instance, validated_data):
-        password = validated_data.pop('password', None)
+        self.hashed_password = instance.password
 
         for (key, value) in validated_data.items():
             setattr(instance, key, value)
-
-        if password is not None:
-            instance.set_password(password)
 
         instance.save()
 

@@ -96,7 +96,8 @@ class UserModelValidationOnCreateTests(UserModelTests):
         errors = ''
         sample = self.samples['users'][1]
         sample['username'] = '        '
-        sample['password'] = '        '
+        sample['password'] = ''
+        sample['password2'] = ''
         sample['email'] = None
 
         try:
@@ -126,6 +127,7 @@ class UserModelValidationOnCreateTests(UserModelTests):
     def test_password_min_length(self):
         sample = self.samples['users'][1]
         sample['password'] = '*'
+        sample['password2'] = '*'
 
         try:
             self.create_user(**sample)
@@ -133,6 +135,18 @@ class UserModelValidationOnCreateTests(UserModelTests):
             errors = dict(err)
 
         self.assertIn('password', errors)
+        self.assertEqual(1, len(errors))
+
+    def test_password2_confirmation(self):
+        sample = self.samples['users'][1]
+        sample['password2'] += 'bla'
+
+        try:
+            self.create_user(**sample)
+        except Exception as err:
+            errors = dict(err)
+
+        self.assertIn('password2', errors)
         self.assertEqual(1, len(errors))
 
     def test_email_normalization(self):
@@ -154,7 +168,8 @@ class UserModelValidationOnUpdateTests(UserModelTests):
         sample = self.samples['users'][1]
         user = self.create_user(**sample)
         sample['username'] = '        '
-        sample['password'] = '        '
+        sample['password'] = ''
+        sample['password2'] = ''
         sample['email'] = None
 
         try:

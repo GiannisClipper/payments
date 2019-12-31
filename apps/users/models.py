@@ -1,8 +1,10 @@
 from django.db import models
+
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, \
                                         PermissionsMixin
 
 from django.core.validators import MinLengthValidator
+from django.core.exceptions import ValidationError
 
 from .jwtokens.models import JWToken
 
@@ -12,6 +14,7 @@ from .constants import (
     PASSWORD_REQUIRED,
     PASSWORD_TOO_SHORT,
     PASSWORD_MIN_LENGTH,
+    PASSWORD_NOT_CONFIRMED,
     EMAIL_REQUIRED,
     EMAIL_EXISTS,
 )
@@ -50,26 +53,27 @@ class UserManager(BaseUserManager):
     inheriting from `BaseUserManager` get a lot of Django code.
     '''
 
-    def create_user(self, username=None, email=None, password=None):
+    def create_user(self, username=None, email=None, password=None, password2=None):
         '''Creates and returns a user.'''
 
         user = self.model(
             username=username,
-            email=self.normalize_email(email)
+            email=self.normalize_email(email),
         )
 
         # `password` value assigned after initializing `user` object in order
         # to be converted to hashed string by the customized `save` method
         user.password = password
+        user.password2 = password2
 
         user.save()
 
         return user
 
-    def create_superuser(self, username, email, password):
+    def create_superuser(self, username=None, email=None, password=None, password2=None):
         '''Creates and returns a user with superuser permissions.'''
 
-        user = self.create_user(username, email, password)
+        user = self.create_user(username, email, password, password2)
         user.is_superuser = True
         user.is_staff = True
 
@@ -115,31 +119,52 @@ class User(AbstractBaseUser, PermissionsMixin, JWToken):
 
     USERNAME_FIELD = 'username'  # Field is used to signin (ex. 'email')
 
-    saved_password = None  # Helps to identify and hash new passwords
+    hashed_password = None  # Helps to identify and hash new passwords
+    password1 = None  # Help to password confirmation
+    password2 = None  # Help to password confirmation
 
     objects = UserManager()
 
-    def save(self, *args, **kwargs):
+    # There are three steps involved in validating a model:
+    # Validate the model fields - Model.clean_fields()
+    # Validate the model as a whole - Model.clean()
+    # Validate the field uniqueness - Model.validate_unique()
+    # All three steps are performed when you call full_clean() method.
 
+    def clean_fields(self, *args, **kwargs):
         # Remove leading or trailing spaces from strings
         for field in self._meta.fields:
             if isinstance(field, (models.CharField, models.TextField)):
                 value = getattr(self, field.name)
-                if value:
+                if value is not None:
                     setattr(self, field.name, value.strip())
 
+        super().clean_fields(*args, **kwargs)
+
+    def clean(self, *args, **kwargs):
+        # Only new passwords should be confirmed
+        if self.hashed_password != self.password != self.password2:
+            raise ValidationError({'password2': PASSWORD_NOT_CONFIRMED})
+
+        super(User, self).clean(*args, **kwargs)
+
+    def save(self, *args, **kwargs):
         # Field validations run here
         self.full_clean()
 
         # Only new passwords should be converted to hashed strings
-        if self.saved_password != self.password:
+        if self.hashed_password != self.password:
+            #print(self.password, end='->')
             self.set_password(self.password)
-            self.saved_password = self.password
+            self.hashed_password = self.password
+            #print(self.hashed_password)
 
         super().save(*args, **kwargs)
 
     def update(self, **fields):
         '''Updates and returns a user.'''
+
+        self.hashed_password = self.password
 
         for key, value in fields.items():
             setattr(self, key, value)

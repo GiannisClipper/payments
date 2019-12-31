@@ -7,5 +7,6 @@ EMAIL_EXISTS = 'Email already exists.'
 
 PASSWORD_MIN_LENGTH = 4
 PASSWORD_TOO_SHORT = f'Password too short (min {PASSWORD_MIN_LENGTH} chars).'
+PASSWORD_NOT_CONFIRMED = 'Password does not confirmed.'
 
 CREDENTIALS_NOT_MATCH = 'Credentials does not match.'

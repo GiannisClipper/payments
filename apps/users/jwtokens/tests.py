@@ -14,6 +14,7 @@ class JWTokenTests(TestCase):
         self.user = get_user_model().objects.create_user(
             username='user1',
             password='pass123',
+            password2='pass123',
             email='user1@testemail.org'
         )
 

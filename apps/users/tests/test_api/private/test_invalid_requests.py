@@ -9,6 +9,7 @@ from users.constants import (
     USERNAME_EXISTS,
     PASSWORD_REQUIRED,
     PASSWORD_TOO_SHORT,
+    PASSWORD_NOT_CONFIRMED,
     EMAIL_REQUIRED,
     EMAIL_EXISTS,
     CREDENTIALS_NOT_MATCH,
@@ -82,6 +83,21 @@ class AdminPatchUserByIdAPITests(AdminGetUserByIdAPITests):
         self.assertIn(USERNAME_REQUIRED, res.data['errors']['username'])
         self.assertIn(PASSWORD_REQUIRED, res.data['errors']['password'])
         self.assertIn(EMAIL_REQUIRED, res.data['errors']['email'])
+        self.assertEqual(token, res.data['token'])
+
+    def test_when_invalid_password_confirmation(self):
+        sample = self.SIGNIN_USER
+        user, token = self.signin(sample)
+        del sample['username']
+        del sample['email']
+        sample['password2'] += 'bla'
+        res = self.api_request(self.URL, self.METHOD, payload=sample, token=token)
+
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('errors', res.data)
+        self.assertIn('password2', res.data['errors'])
+        self.assertEqual(1, len(res.data['errors']))
+        self.assertIn(PASSWORD_NOT_CONFIRMED, res.data['errors']['password2'])
         self.assertEqual(token, res.data['token'])
 
 

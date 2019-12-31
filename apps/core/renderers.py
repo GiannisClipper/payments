@@ -25,7 +25,7 @@ class GenericJSONRenderer(JSONRenderer):
 
         # Resend the `token` key included in request, except
         # a new one has been generated (whenever signing in)
-        if token == None and renderer_context['request'].auth:
+        if token is None and renderer_context['request'].auth:
             token = renderer_context['request'].auth
 
             # TokenAuthentication provides on success following credentials:
