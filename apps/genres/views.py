@@ -95,6 +95,7 @@ class ListGenresAPIView(RetrieveAPIView):
     def get_queryset(self, request):
         user = None
         user_id = request.query_params.get('user_id', None)
+        f_name = request.query_params.get('name', None)
 
         # Convert parameters
         try: user_id = None if not user_id else int(user_id)  # noqa: E701
@@ -114,6 +115,9 @@ class ListGenresAPIView(RetrieveAPIView):
             data = Genre.objects.filter(user=user)
         else:
             data = Genre.objects.all()
+
+        if f_name:
+            data = [x for x in data if f_name in x.name]
 
         return data
 

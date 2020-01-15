@@ -88,7 +88,7 @@ class FundSerializer(serializers.HyperlinkedModelSerializer):
     def delete(self, instance):
         instance.delete()
 
-        return None
+        return {}
 
 
 class FundSerializerField(serializers.RelatedField):

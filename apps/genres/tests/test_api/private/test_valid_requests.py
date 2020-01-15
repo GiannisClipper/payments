@@ -96,6 +96,14 @@ class AdminGetList(AdminPrivateGenresAPITests):
         self.assertIn('genres', res.data)
         self.assertEqual(res.data['token'], self.token)
 
+    def test_get_list_passing_filter_name(self):
+        res = self.api_request(LIST_URL + '?name=INCOMING', 'GET', token=self.token)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertIn('genres', res.data)
+        self.assertEqual(len(res.data['genres']), 1)
+        self.assertEqual(res.data['token'], self.token)
+
 
 class OwnerGetList(OwnerPrivateGenresAPITests):
     '''Test owner's list requests to genres API.'''
@@ -117,4 +125,12 @@ class OwnerGetList(OwnerPrivateGenresAPITests):
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertIn('genres', res.data)
+        self.assertEqual(res.data['token'], self.token)
+
+    def test_get_list_passing_filter_name(self):
+        res = self.api_request(LIST_URL + '?name=ING', 'GET', token=self.token)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertIn('genres', res.data)
+        self.assertEqual(len(res.data['genres']), 2)
         self.assertEqual(res.data['token'], self.token)

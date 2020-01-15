@@ -154,10 +154,8 @@ class User(AbstractBaseUser, PermissionsMixin, JWToken):
 
         # Only new passwords should be converted to hashed strings
         if self.hashed_password != self.password:
-            #print(self.password, end='->')
             self.set_password(self.password)
             self.hashed_password = self.password
-            #print(self.hashed_password)
 
         super().save(*args, **kwargs)
 

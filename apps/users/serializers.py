@@ -27,12 +27,7 @@ class SignupSerializer(serializers.ModelSerializer):
 
     password = serializers.CharField(
         write_only=True,
-        validators=[
-            MinLengthValidator(
-                PASSWORD_MIN_LENGTH,
-                message=PASSWORD_TOO_SHORT
-            )
-        ],
+        validators=[MinLengthValidator(PASSWORD_MIN_LENGTH, message=PASSWORD_TOO_SHORT)],
         error_messages=error_messages['password']['error_messages']
     )
 
@@ -135,7 +130,17 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = User
-        fields = ('id', 'username', 'password', 'password2', 'email', 'is_admin', 'is_active', 'url')
+
+        fields = (
+            'id',
+            'username',
+            'password',
+            'password2',
+            'email',
+            'is_admin',
+            'is_active',
+            'url'
+        )
 
         extra_kwargs = error_messages
 
