@@ -12,6 +12,8 @@ from users.permissions import IsAdminUserOrOwner
 from .serializers import PaymentSerializer
 from .renderers import PaymentJSONRenderer, PaymentsJSONRenderer
 
+from datetime import datetime
+
 
 class CreatePaymentAPIView(APIView):
     permission_classes = (IsAuthenticated,)
@@ -106,28 +108,79 @@ class ListPaymentsAPIView(RetrieveAPIView):
 
     def get_queryset(self, request):
         user = None
-        user_id = request.query_params.get('user_id', None)
 
-        # Convert parameters
-        try: user_id = None if not user_id else int(user_id)  # noqa: E701
-        except Exception: user_id = -1  # noqa: E701
+        # Get query parameters
+        filters = request.query_params.getlist('filters')
+        filters = {f.split(':')[0]: f.split(':')[1] for f in filters if len(f.split(':')) == 2}
+        filters = {**{
+            'user_id': None,
+            'date': None,
+            'genre_id': None,
+            'incoming': None,
+            'outgoing': None,
+            'remarks': None,
+            'fund_id': None
+        }, **filters}
 
-        # Check permissions
+        # Convert parameter values
+        if filters['user_id']:
+            filters['user_id'] = int(filters['user_id']) if filters['user_id'].isdigit() else -1
+
+        if filters['date']:
+            filters['date'] = (filters['date'].split(' ') + [None])[:2]
+            filters['date'][0] = datetime.strptime(filters['date'][0], '%d-%m-%Y').date() if filters['date'][0] else None  # noqa: E501
+            filters['date'][1] = datetime.strptime(filters['date'][1], '%d-%m-%Y').date() if filters['date'][1] else None  # noqa: E501
+
+        if filters['incoming']:
+            filters['incoming'] = (filters['incoming'].split(' ') + [None])[:2]
+            filters['incoming'][0] = float(filters['incoming'][0]) if filters['incoming'][0] else None  # noqa: E501
+            filters['incoming'][1] = float(filters['incoming'][1]) if filters['incoming'][1] else None  # noqa: E501
+
+        if filters['outgoing']:
+            filters['outgoing'] = (filters['outgoing'].split(' ') + [None])[:2]
+            filters['outgoing'][0] = float(filters['outgoing'][0]) if filters['outgoing'][0] else None  # noqa: E501
+            filters['outgoing'][1] = float(filters['outgoing'][1]) if filters['outgoing'][1] else None  # noqa: E501
+
+        if filters['genre_id']:
+            filters['genre_id'] = int(filters['genre_id'])
+
+        if filters['fund_id']:
+            filters['fund_id'] = int(filters['fund_id'])
+
+        # Check user permissions
         if not request.user.is_staff:
-            if not user_id or user_id == request.user.pk:
+            if not filters['user_id'] or filters['user_id'] == request.user.pk:
                 user = request.user
             self.check_object_permissions(request, user)
 
-        # Check if parameter exists
-        if not user and user_id:
-            user = get_object_or_404(get_user_model(), pk=user_id)
+        # Check if user parameter exists
+        if not user and filters['user_id']:
+            user = get_object_or_404(get_user_model(), pk=filters['user_id'])
 
-        if user:
-            data = Payment.objects.filter(user=user)
-        else:
-            data = Payment.objects.all()
+        # Select proper dataset based on user
+        data = Payment.objects.filter(user=user) if user else Payment.objects.all()
 
-        return data
+        # Filter data
+        filtered_data = []
+        for row in data:
+            if not filters['date'] or (
+                (not filters['date'][0] or filters['date'][0] <= row.date) and
+                (not filters['date'][1] or filters['date'][1] >= row.date)
+            ):
+                if not filters['incoming'] or (
+                    (not filters['incoming'][0] or filters['incoming'][0] <= row.incoming) and
+                    (not filters['incoming'][1] or filters['incoming'][1] >= row.incoming)
+                ):
+                    if not filters['outgoing'] or (
+                        (not filters['outgoing'][0] or filters['outgoing'][0] <= row.outgoing) and  # noqa: E501
+                        (not filters['outgoing'][1] or filters['outgoing'][1] >= row.outgoing)
+                    ):
+                        if not filters['remarks'] or filters['remarks'] in row.remarks:
+                            if not filters['genre_id'] or filters['genre_id'] == row.genre.id:
+                                if not filters['fund_id'] or filters['fund_id'] == row.fund.id:
+                                    filtered_data.append(row)
+
+        return filtered_data
 
     def retrieve(self, request, *args, **kwargs):
         queryset = self.get_queryset(request)

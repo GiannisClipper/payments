@@ -180,7 +180,7 @@ class AdminGetList(AdminPrivatePaymentsAPITests):
     METHOD = 'GET'
 
     def test_request_when_user_id_not_exists(self):
-        res = self.api_request(LIST_URL + '?user_id=blabla', self.METHOD, token=self.token)
+        res = self.api_request(LIST_URL + '?filters=user_id:blabla', self.METHOD, token=self.token)  # noqa: E501
 
         self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
         self.assertIn('errors', res.data)
@@ -193,7 +193,7 @@ class OwnerGetList(OwnerPrivatePaymentsAPITests):
     METHOD = 'GET'
 
     def test_unauthorized_request(self):
-        res = self.api_request(LIST_URL + '?user_id=blabla', self.METHOD, token=self.token)
+        res = self.api_request(LIST_URL + '?filters=user_id:blabla', self.METHOD, token=self.token)  # noqa: E501
 
         self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
         self.assertIn('errors', res.data)

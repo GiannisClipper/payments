@@ -106,6 +106,32 @@ class AdmninGetListAPITests(UsersPrivateAPITests):
         self.assertEqual(token, res.data['token'])
 
 
+class AdmninGetListFilteredAPITests(UsersPrivateAPITests):
+    '''Test filtered all users list API.'''
+
+    LIST_URL = reverse('users:all-list')
+
+    def test_get_list_passing_filters_username(self):
+        sample = self.samples['admins'][1]
+        user, token = self.signin(sample)
+        res = self.api_request(self.LIST_URL + '?filters=username:admin', 'GET', token=token)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertIn('users', res.data)
+        self.assertEqual(len(res.data['users']), 2)
+        self.assertEqual(res.data['token'], token)
+
+    def test_get_list_passing_filters_email(self):
+        sample = self.samples['admins'][1]
+        user, token = self.signin(sample)
+        res = self.api_request(self.LIST_URL + '?filters=email:@blabla.org', 'GET', token=token)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertIn('users', res.data)
+        self.assertEqual(len(res.data['users']), 0)
+        self.assertEqual(res.data['token'], token)
+
+
 class AdmninGetAdminUsersListAPITests(AdmninGetListAPITests):
     '''Test admin users list API.'''
 

@@ -99,11 +99,26 @@ class AllUsersAPIView(RetrieveAPIView):
     serializer_class = UserSerializer
     renderer_classes = (UsersJSONRenderer,)
 
-    def get_queryset(self):
-        return User.objects.all()
+    def get_queryset(self, request):
+
+        # Get query parameters
+        filters = request.query_params.getlist('filters')
+        filters = {f.split(':')[0]: f.split(':')[1] for f in filters if len(f.split(':')) == 2}
+        filters = {**{'username': None, 'email': None}, **filters}
+
+        data = User.objects.all()
+
+        # Filter data
+        filtered_data = []
+        for row in data:
+            if not filters['username'] or filters['username'] in row.username:
+                if not filters['email'] or filters['email'] in row.email:
+                    filtered_data.append(row)
+
+        return filtered_data
 
     def retrieve(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
+        queryset = self.get_queryset(request)
 
         serializer = self.serializer_class(
             queryset,
@@ -116,23 +131,23 @@ class AllUsersAPIView(RetrieveAPIView):
 
 class AdminUsersAPIView(AllUsersAPIView):
 
-    def get_queryset(self):
+    def get_queryset(self, request):
         return User.objects.filter(is_staff=True)
 
 
 class NoAdminUsersAPIView(AllUsersAPIView):
 
-    def get_queryset(self):
+    def get_queryset(self, request):
         return User.objects.filter(is_staff=False)
 
 
 class ActiveUsersAPIView(AllUsersAPIView):
 
-    def get_queryset(self):
+    def get_queryset(self, request):
         return User.objects.filter(is_active=True)
 
 
 class NoActiveUsersAPIView(AllUsersAPIView):
 
-    def get_queryset(self):
+    def get_queryset(self, request):
         return User.objects.filter(is_active=False)

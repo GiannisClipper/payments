@@ -85,12 +85,60 @@ class AdminGetList(AdminPrivatePaymentsAPITests):
         self.assertEqual(len(res.data['payments']), len(self.samples['payments']))
         self.assertEqual(res.data['token'], self.token)
 
-    def test_get_list_passing_other_user_id(self):
-        res = self.api_request(LIST_URL + '?user_id=1', 'GET', token=self.token)
+    def test_get_list_passing_filters_user_id(self):
+        res = self.api_request(LIST_URL + '?filters=user_id:1', 'GET', token=self.token)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertIn('payments', res.data)
         self.assertTrue(len(res.data['payments']) > 0)
+        self.assertEqual(res.data['token'], self.token)
+
+    def test_get_list_passing_filters_date(self):
+        res = self.api_request(LIST_URL + '?filters=date:01-11-2019 30-11-2019', 'GET', token=self.token)  # noqa: E501
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertIn('payments', res.data)
+        self.assertEqual(len(res.data['payments']), 4)
+        self.assertEqual(res.data['token'], self.token)
+
+    def test_get_list_passing_filters_incoming(self):
+        res = self.api_request(LIST_URL + '?filters=incoming:20', 'GET', token=self.token)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertIn('payments', res.data)
+        self.assertEqual(len(res.data['payments']), 1)
+        self.assertEqual(res.data['token'], self.token)
+
+    def test_get_list_passing_filters_outgoing(self):
+        res = self.api_request(LIST_URL + '?filters=outgoing:0.01 19.9', 'GET', token=self.token)  # noqa: E501
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertIn('payments', res.data)
+        self.assertEqual(len(res.data['payments']), 2)
+        self.assertEqual(res.data['token'], self.token)
+
+    def test_get_list_passing_filters_remarks(self):
+        res = self.api_request(LIST_URL + '?filters=remarks:blabla', 'GET', token=self.token)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertIn('payments', res.data)
+        self.assertEqual(len(res.data['payments']), 0)
+        self.assertEqual(res.data['token'], self.token)
+
+    def test_get_list_passing_filters_genre_id(self):
+        res = self.api_request(LIST_URL + '?filters=genre_id:100', 'GET', token=self.token)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertIn('payments', res.data)
+        self.assertEqual(len(res.data['payments']), 0)
+        self.assertEqual(res.data['token'], self.token)
+
+    def test_get_list_passing_filters_fund_id(self):
+        res = self.api_request(LIST_URL + '?filters=fund_id:200', 'GET', token=self.token)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertIn('payments', res.data)
+        self.assertEqual(len(res.data['payments']), 0)
         self.assertEqual(res.data['token'], self.token)
 
 

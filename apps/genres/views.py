@@ -94,32 +94,57 @@ class ListGenresAPIView(RetrieveAPIView):
 
     def get_queryset(self, request):
         user = None
-        user_id = request.query_params.get('user_id', None)
-        f_name = request.query_params.get('name', None)
 
-        # Convert parameters
-        try: user_id = None if not user_id else int(user_id)  # noqa: E701
-        except Exception: user_id = -1  # noqa: E701
+        # Get query parameters
+        filters = request.query_params.getlist('filters')
+        filters = {f.split(':')[0]: f.split(':')[1] for f in filters if len(f.split(':')) == 2}
+        filters = {**{
+            'user_id': None,
+            'code': None,
+            'name': None,
+            'is_incoming': None,
+            'fund_id': None
+        }, **filters}
 
-        # Check permissions
+        # Convert parameter values
+        if filters['user_id']:
+            filters['user_id'] = int(filters['user_id']) if filters['user_id'].isdigit() else -1
+
+        if filters['code']:
+            filters['code'] = (filters['code'].split(' ') + [None])[:2]
+
+        if filters['is_incoming']:
+            filters['is_incoming'] = {'true': True, 'false': False}.get(filters['is_incoming'].lower(), None)  # noqa: E501
+
+        if filters['fund_id']:
+            filters['fund_id'] = int(filters['fund_id'])
+
+        # Check user permissions
         if not request.user.is_staff:
-            if not user_id or user_id == request.user.pk:
+            if not filters['user_id'] or filters['user_id'] == request.user.pk:
                 user = request.user
             self.check_object_permissions(request, user)
 
-        # Check if parameter exists
-        if not user and user_id:
-            user = get_object_or_404(get_user_model(), pk=user_id)
+        # Check if user parameter exists
+        if not user and filters['user_id']:
+            user = get_object_or_404(get_user_model(), pk=filters['user_id'])
 
-        if user:
-            data = Genre.objects.filter(user=user)
-        else:
-            data = Genre.objects.all()
+        # Select proper dataset based on user
+        data = Genre.objects.filter(user=user) if user else Genre.objects.all()
 
-        if f_name:
-            data = [x for x in data if f_name in x.name]
+        # Filter data
+        filtered_data = []
+        for row in data:
+            if not filters['code'] or (
+                (not filters['code'][0] or filters['code'][0] <= row.code) and
+                (not filters['code'][1] or filters['code'][1] >= row.code)
+            ):
+                if not filters['name'] or filters['name'] in row.name:
+                    if not filters['is_incoming'] or filters['is_incoming'] == row.is_incoming:
+                        if not filters['fund_id'] or filters['fund_id'] == row.fund.id:
+                            filtered_data.append(row)
 
-        return data
+        return filtered_data
 
     def retrieve(self, request, *args, **kwargs):
         queryset = self.get_queryset(request)

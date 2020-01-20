@@ -85,19 +85,27 @@ class AdminGetList(AdminPrivateFundsAPITests):
         self.assertEqual(len(res.data['funds']), len(self.samples['funds']))
         self.assertEqual(res.data['token'], self.token)
 
-    def test_get_list_passing_other_user_id(self):
-        res = self.api_request(LIST_URL + '?user_id=1', 'GET', token=self.token)
+    def test_get_list_passing_filters_user_id(self):
+        res = self.api_request(LIST_URL + '?filters=user_id:1', 'GET', token=self.token)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertIn('funds', res.data)
         self.assertEqual(res.data['token'], self.token)
 
-    def test_get_list_passing_filter_name(self):
-        res = self.api_request(LIST_URL + '?name=CARD', 'GET', token=self.token)
+    def test_get_list_passing_filters_name(self):
+        res = self.api_request(LIST_URL + '?filters=name:CARD', 'GET', token=self.token)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertIn('funds', res.data)
         self.assertEqual(len(res.data['funds']), 2)
+        self.assertEqual(res.data['token'], self.token)
+
+    def test_get_list_passing_filters_code(self):
+        res = self.api_request(LIST_URL + '?filters=code:2 3', 'GET', token=self.token)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertIn('funds', res.data)
+        self.assertEqual(len(res.data['funds']), 3)
         self.assertEqual(res.data['token'], self.token)
 
 
@@ -124,7 +132,7 @@ class OwnerGetList(OwnerPrivateFundsAPITests):
         self.assertEqual(res.data['token'], self.token)
 
     def test_get_list_passing_filter_name(self):
-        res = self.api_request(LIST_URL + '?name=CARD', 'GET', token=self.token)
+        res = self.api_request(LIST_URL + '?filters=name:CARD', 'GET', token=self.token)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertIn('funds', res.data)

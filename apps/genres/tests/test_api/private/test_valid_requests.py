@@ -89,19 +89,43 @@ class AdminGetList(AdminPrivateGenresAPITests):
         self.assertEqual(len(res.data['genres']), len(self.samples['genres']))
         self.assertEqual(res.data['token'], self.token)
 
-    def test_get_list_passing_other_user_id(self):
-        res = self.api_request(LIST_URL + '?user_id=1', 'GET', token=self.token)
+    def test_get_list_passing_filters_user_id(self):
+        res = self.api_request(LIST_URL + '?filters=user_id:1', 'GET', token=self.token)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertIn('genres', res.data)
         self.assertEqual(res.data['token'], self.token)
 
-    def test_get_list_passing_filter_name(self):
-        res = self.api_request(LIST_URL + '?name=INCOMING', 'GET', token=self.token)
+    def test_get_list_passing_filters_code(self):
+        res = self.api_request(LIST_URL + '?filters=code:ES EX', 'GET', token=self.token)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertIn('genres', res.data)
+        self.assertEqual(len(res.data['genres']), 2)
+        self.assertEqual(res.data['token'], self.token)
+
+    def test_get_list_passing_filters_name(self):
+        res = self.api_request(LIST_URL + '?filters=name:INCOMING', 'GET', token=self.token)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertIn('genres', res.data)
         self.assertEqual(len(res.data['genres']), 1)
+        self.assertEqual(res.data['token'], self.token)
+
+    def test_get_list_passing_filters_is_incoming(self):
+        res = self.api_request(LIST_URL + '?filters=is_incoming:true', 'GET', token=self.token)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertIn('genres', res.data)
+        self.assertEqual(len(res.data['genres']), 2)
+        self.assertEqual(res.data['token'], self.token)
+
+    def test_get_list_passing_filters_fund_id(self):
+        res = self.api_request(LIST_URL + '?filters=fund_id:1', 'GET', token=self.token)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertIn('genres', res.data)
+        self.assertEqual(len(res.data['genres']), 2)
         self.assertEqual(res.data['token'], self.token)
 
 
@@ -120,17 +144,17 @@ class OwnerGetList(OwnerPrivateGenresAPITests):
         self.assertNotEqual(len(res.data['genres']), len(self.samples['genres']))
         self.assertEqual(res.data['token'], self.token)
 
-    def test_get_list_passing_self_user_id(self):
-        res = self.api_request(LIST_URL + '?user_id=1', 'GET', token=self.token)
+    def test_get_list_passing_filters_user_id(self):
+        res = self.api_request(LIST_URL + '?filters=user_id:1', 'GET', token=self.token)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertIn('genres', res.data)
         self.assertEqual(res.data['token'], self.token)
 
-    def test_get_list_passing_filter_name(self):
-        res = self.api_request(LIST_URL + '?name=ING', 'GET', token=self.token)
+    def test_get_list_passing_filters_name(self):
+        res = self.api_request(LIST_URL + '?filters=name:bla bla', 'GET', token=self.token)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertIn('genres', res.data)
-        self.assertEqual(len(res.data['genres']), 2)
+        self.assertEqual(len(res.data['genres']), 0)
         self.assertEqual(res.data['token'], self.token)
