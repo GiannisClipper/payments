@@ -27,16 +27,14 @@ class CreatePaymentAPIView(APIView):
             payment['user'] = {'id': request.user.pk}
 
         # An `incoming` value is necessary for UniqueTogether validation
-        if not payment.get('incoming', None):
-            payment['incoming'] = 0
+        payment['incoming'] = float(payment['incoming']) if payment.get('incoming', None) else 0
 
         # An `outgoing` value is necessary for UniqueTogether validation
-        if not payment.get('outgoing', None):
-            payment['outgoing'] = 0
+        payment['outgoing'] = float(payment['outgoing']) if payment.get('outgoing', None) else 0
 
         # A `remarks` value is necessary for UniqueTogether validation
         if not payment.get('remarks', None):
-            payment['remarks'] = 0
+            payment['remarks'] = ''
 
         serializer = self.serializer_class(
             data=payment,

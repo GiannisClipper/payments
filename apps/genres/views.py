@@ -140,7 +140,7 @@ class ListGenresAPIView(RetrieveAPIView):
                 (not filters['code'][1] or filters['code'][1] >= row.code)
             ):
                 if not filters['name'] or filters['name'] in row.name:
-                    if not filters['is_incoming'] or filters['is_incoming'] == row.is_incoming:
+                    if filters['is_incoming'] == None or filters['is_incoming'] == row.is_incoming:
                         if not filters['fund_id'] or filters['fund_id'] == row.fund.id:
                             filtered_data.append(row)
 
